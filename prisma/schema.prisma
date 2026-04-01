@@ -1,0 +1,131 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum UserRole {
+  ADMIN
+  RESEARCHER
+  EDITOR
+  VIEWER
+}
+
+enum PostStatus {
+  DRAFT
+  PUBLISHED
+}
+
+enum PostCategory {
+  COMMENTARY
+  POLICY_BRIEF
+  PRESS
+  SEMINAR
+}
+
+enum ResearchArea {
+  KOREA_POLICY
+  DIGITAL_FINANCE
+  INFRASTRUCTURE
+  INCLUSION
+}
+
+enum TeamMemberType {
+  FOUNDER
+  FELLOW
+  ADVISOR
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  name      String
+  nameEn    String?
+  role      UserRole @default(VIEWER)
+  avatar    String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  sessions    Session[]
+  teamProfile TeamMember?
+
+  @@map("users")
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([token])
+  @@index([expiresAt])
+  @@map("sessions")
+}
+
+model TeamMember {
+  id            String         @id @default(cuid())
+  userId        String?        @unique
+  name          String
+  nameEn        String?
+  title         String
+  titleEn       String?
+  bio           String
+  bioEn         String?
+  credentials   String[]
+  credentialsEn String[]
+  type          TeamMemberType @default(FELLOW)
+  order         Int            @default(0)
+  published     Boolean        @default(true)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  user  User?  @relation(fields: [userId], references: [id], onDelete: SetNull)
+  posts Post[]
+
+  @@index([published, order])
+  @@map("team_members")
+}
+
+model Post {
+  id           String       @id @default(cuid())
+  authorId     String
+  category     PostCategory
+  status       PostStatus   @default(DRAFT)
+  title        String
+  titleEn      String?
+  excerpt      String?
+  excerptEn    String?
+  content      String?
+  contentEn    String?
+  researchArea ResearchArea
+  publishedAt  DateTime?
+  views        Int          @default(0)
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  author TeamMember @relation(fields: [authorId], references: [id])
+
+  @@index([status, publishedAt(sort: Desc)])
+  @@index([category])
+  @@index([researchArea])
+  @@map("posts")
+}
+
+model SiteSettings {
+  id              String   @id @default("default")
+  siteName        String   @default("IDAPI")
+  lang            String   @default("ko")
+  partnersVisible Boolean  @default(false)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@map("site_settings")
+}
