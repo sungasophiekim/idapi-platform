@@ -2,7 +2,7 @@
 // Orchestrates law collection from multiple jurisdictions
 
 import { collectKoreanLaw } from './kr-collector';
-import { saveLawToArchive, fetchAndParseLawFromUrl } from './intl-collector.stub';
+import { saveLawToArchive, fetchAndParseLawFromUrl } from './intl-collector';
 import { getArchiveStats } from '../law-archive';
 
 export interface CollectionTarget {
