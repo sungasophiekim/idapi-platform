@@ -28,7 +28,10 @@ export interface ComplianceRequirement {
 export type BusinessType =
   | 'exchange'            // 거래소
   | 'stablecoin-issuer'   // 스테이블코인 발행
-  | 'token-issuer'        // 토큰 발행 (STO/ICO)
+  | 'sto-issuer'          // STO (증권형 토큰) 발행
+  | 'rwa-issuer'          // RWA (실물자산 토큰) 발행
+  | 'ico-issuer'          // ICO/IDO/IEO 토큰 발행
+  | 'token-issuer'        // 기타 토큰 발행
   | 'wallet-provider'     // 지갑/수탁 서비스
   | 'defi-protocol'       // DeFi 프로토콜
   | 'nft-platform'        // NFT 마켓플레이스
@@ -40,7 +43,10 @@ export type BusinessType =
 export const BUSINESS_TYPE_LABELS: Record<BusinessType, { ko: string; en: string }> = {
   'exchange': { ko: '가상자산 거래소', en: 'Crypto Exchange / VASP' },
   'stablecoin-issuer': { ko: '스테이블코인 발행', en: 'Stablecoin Issuer' },
-  'token-issuer': { ko: '토큰 발행 (STO/ICO)', en: 'Token Issuer (STO/ICO)' },
+  'sto-issuer': { ko: 'STO (증권형 토큰) 발행', en: 'STO (Security Token Offering)' },
+  'rwa-issuer': { ko: 'RWA (실물자산 토큰) 발행', en: 'RWA (Real World Asset) Issuer' },
+  'ico-issuer': { ko: 'ICO/IDO/IEO 토큰 발행', en: 'ICO/IDO/IEO Token Issuer' },
+  'token-issuer': { ko: '기타 토큰 발행', en: 'Other Token Issuer' },
   'wallet-provider': { ko: '지갑/수탁 서비스', en: 'Wallet / Custody Provider' },
   'defi-protocol': { ko: 'DeFi 프로토콜', en: 'DeFi Protocol' },
   'nft-platform': { ko: 'NFT 마켓플레이스', en: 'NFT Marketplace' },
@@ -136,7 +142,7 @@ export const CURRENT_LAWS: LawRequirement[] = [
     lawName: 'MiCA (Markets in Crypto-Assets Regulation)',
     lawNameEn: 'MiCA (Markets in Crypto-Assets Regulation)',
     enacted: '2024-12-30',
-    appliesToBusinessTypes: ['exchange', 'wallet-provider', 'stablecoin-issuer', 'token-issuer', 'payment-service'],
+    appliesToBusinessTypes: ['exchange', 'wallet-provider', 'stablecoin-issuer', 'token-issuer', 'sto-issuer', 'rwa-issuer', 'ico-issuer', 'payment-service'],
     requirements: [
       { id: 'eu-1', category: 'license', requirement: 'CASP(Crypto-Asset Service Provider) 라이선스 취득', requirementEn: 'CASP license from national competent authority', isMandatory: true },
       { id: 'eu-2', category: 'capital', requirement: '최소 자본금 요건 (서비스 유형별 €50K-€150K)', requirementEn: 'Minimum capital requirements (€50K-€150K by service type)', isMandatory: true },
@@ -177,7 +183,7 @@ export const CURRENT_LAWS: LawRequirement[] = [
     lawNameEn: 'Payment Services Act / Financial Instruments and Exchange Act (Crypto)',
     enacted: '2017-04-01',
     lastAmended: '2023-06-01',
-    appliesToBusinessTypes: ['exchange', 'wallet-provider', 'stablecoin-issuer', 'token-issuer'],
+    appliesToBusinessTypes: ['exchange', 'wallet-provider', 'stablecoin-issuer', 'token-issuer', 'sto-issuer', 'rwa-issuer', 'ico-issuer'],
     requirements: [
       { id: 'jp-1', category: 'license', requirement: 'JFSA 가상자산교환업자 등록', requirementEn: 'JFSA Crypto Asset Exchange registration', isMandatory: true },
       { id: 'jp-2', category: 'capital', requirement: '최소자본금 1,000만엔 + 순자산 양수 유지', requirementEn: 'Minimum capital JPY 10M + positive net assets', isMandatory: true },

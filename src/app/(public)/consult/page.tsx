@@ -22,12 +22,30 @@ const STAGES = [
   { value: 'expanding', ko: '확장/신규 시장 진출', en: 'Expanding' },
 ];
 
-const TOKEN_TYPES = [
-  { value: 'stablecoin', ko: '스테이블코인', en: 'Stablecoin' },
-  { value: 'utility', ko: '유틸리티 토큰', en: 'Utility Token' },
-  { value: 'security', ko: '증권형 토큰 (STO)', en: 'Security Token (STO)' },
-  { value: 'nft', ko: 'NFT', en: 'NFT' },
-  { value: 'governance', ko: '거버넌스 토큰', en: 'Governance Token' },
+const TOKEN_CATEGORIES = [
+  { group: 'Securities', groupKo: '증권형', items: [
+    { value: 'sto', ko: 'STO (증권형 토큰)', en: 'STO (Security Token Offering)' },
+    { value: 'rwa', ko: 'RWA (실물자산 토큰)', en: 'RWA (Real World Asset Token)' },
+  ]},
+  { group: 'Fundraising', groupKo: '자금조달', items: [
+    { value: 'ico', ko: 'ICO (토큰 공개발행)', en: 'ICO (Initial Coin Offering)' },
+    { value: 'ido', ko: 'IDO (탈중앙 공개발행)', en: 'IDO (Initial DEX Offering)' },
+    { value: 'ieo', ko: 'IEO (거래소 공개발행)', en: 'IEO (Initial Exchange Offering)' },
+  ]},
+  { group: 'Utility & Governance', groupKo: '유틸리티/거버넌스', items: [
+    { value: 'utility', ko: '유틸리티 토큰', en: 'Utility Token' },
+    { value: 'governance', ko: '거버넌스 토큰', en: 'Governance Token' },
+  ]},
+  { group: 'Stablecoin', groupKo: '스테이블코인', items: [
+    { value: 'stablecoin-fiat', ko: '법정화폐 담보 스테이블코인', en: 'Fiat-Backed Stablecoin' },
+    { value: 'stablecoin-crypto', ko: '암호자산 담보 스테이블코인', en: 'Crypto-Backed Stablecoin' },
+    { value: 'stablecoin-algo', ko: '알고리즘 스테이블코인', en: 'Algorithmic Stablecoin' },
+  ]},
+  { group: 'Digital Assets', groupKo: '디지털자산', items: [
+    { value: 'nft', ko: 'NFT', en: 'NFT' },
+    { value: 'nft-fractional', ko: '조각투자 NFT', en: 'Fractional NFT' },
+    { value: 'payment-token', ko: '결제용 토큰', en: 'Payment Token' },
+  ]},
 ];
 
 const RISK_COLORS = { low: 'green', medium: 'amber', high: 'red' } as const;
@@ -45,7 +63,7 @@ export default function ConsultPage() {
   const [businessTypes, setBusinessTypes] = useState<BusinessType[]>([]);
   const [jurisdictions, setJurisdictions] = useState<string[]>([]);
   const [hasToken, setHasToken] = useState(false);
-  const [tokenType, setTokenType] = useState('');
+  const [tokenTypes, setTokenTypes] = useState<string[]>([]);
   const [stage, setStage] = useState('idea');
   const [employeeCount, setEmployeeCount] = useState('');
 
@@ -54,6 +72,9 @@ export default function ConsultPage() {
   };
   const toggleJurisdiction = (j: string) => {
     setJurisdictions(prev => prev.includes(j) ? prev.filter(x => x !== j) : [...prev, j]);
+  };
+  const toggleTokenType = (tt: string) => {
+    setTokenTypes(prev => prev.includes(tt) ? prev.filter(x => x !== tt) : [...prev, tt]);
   };
 
   const handleSubmit = async () => {
@@ -70,7 +91,7 @@ export default function ConsultPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           companyName, description, businessTypes, targetJurisdictions: jurisdictions,
-          hasToken, tokenType: hasToken ? tokenType : undefined,
+          hasToken, tokenType: hasToken ? tokenTypes.join(',') : undefined,
           currentStage: stage, employeeCount: employeeCount || undefined,
         }),
       });
@@ -299,21 +320,33 @@ export default function ConsultPage() {
               className={`px-4 py-2 rounded-lg text-[13px] font-medium border transition-all cursor-pointer ${hasToken ? 'bg-green-deep text-white border-green-deep' : 'bg-white text-gray-600 border-gray-200'}`}>
               {t('예', 'Yes')}
             </button>
-            <button onClick={() => { setHasToken(false); setTokenType(''); }}
+            <button onClick={() => { setHasToken(false); setTokenTypes([]); }}
               className={`px-4 py-2 rounded-lg text-[13px] font-medium border transition-all cursor-pointer ${!hasToken ? 'bg-green-deep text-white border-green-deep' : 'bg-white text-gray-600 border-gray-200'}`}>
               {t('아니오', 'No')}
             </button>
           </div>
           {hasToken && (
-            <div className="flex flex-wrap gap-2 mt-3">
-              {TOKEN_TYPES.map(tt => (
-                <button key={tt.value} onClick={() => setTokenType(tt.value)}
-                  className={`px-3 py-1.5 rounded-full text-[12px] font-medium border transition-all cursor-pointer ${
-                    tokenType === tt.value ? 'bg-purple-600 text-white border-purple-600' : 'bg-white text-gray-500 border-gray-200'
-                  }`}>
-                  {lang === 'en' ? tt.en : tt.ko}
-                </button>
+            <div className="mt-4 space-y-4">
+              {TOKEN_CATEGORIES.map(cat => (
+                <div key={cat.group}>
+                  <div className="text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-2">{lang === 'en' ? cat.group : cat.groupKo}</div>
+                  <div className="flex flex-wrap gap-2">
+                    {cat.items.map(tt => (
+                      <button key={tt.value} onClick={() => toggleTokenType(tt.value)}
+                        className={`px-3 py-1.5 rounded-full text-[12px] font-medium border transition-all cursor-pointer ${
+                          tokenTypes.includes(tt.value) ? 'bg-purple-600 text-white border-purple-600' : 'bg-white text-gray-500 border-gray-200 hover:border-gray-300'
+                        }`}>
+                        {lang === 'en' ? tt.en : tt.ko}
+                      </button>
+                    ))}
+                  </div>
+                </div>
               ))}
+              {tokenTypes.length > 0 && (
+                <div className="text-[12px] text-purple-600 font-medium">
+                  {t('선택됨', 'Selected')}: {tokenTypes.length}{t('개', ' types')}
+                </div>
+              )}
             </div>
           )}
         </div>

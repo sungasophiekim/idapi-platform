@@ -11,9 +11,9 @@ const profileSchema = z.object({
   companyName: z.string().optional(),
   description: z.string().min(20).max(5000),
   businessTypes: z.array(z.enum([
-    'exchange', 'stablecoin-issuer', 'token-issuer', 'wallet-provider',
-    'defi-protocol', 'nft-platform', 'payment-service', 'fund-manager',
-    'mining-staking', 'data-analytics',
+    'exchange', 'stablecoin-issuer', 'sto-issuer', 'rwa-issuer', 'ico-issuer',
+    'token-issuer', 'wallet-provider', 'defi-protocol', 'nft-platform',
+    'payment-service', 'fund-manager', 'mining-staking', 'data-analytics',
   ])).min(1),
   targetJurisdictions: z.array(z.string()).min(1),
   hasToken: z.boolean(),
