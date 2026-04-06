@@ -7,6 +7,7 @@ import { prisma } from '@/lib/db';
 import { getAuthUser, requireRole } from '@/lib/auth';
 import { PostStatus, UserRole } from '@prisma/client';
 import { z } from 'zod';
+import { notifyNewPost } from '@/lib/notifications';
 
 // GET /api/posts?category=COMMENTARY&area=KOREA_POLICY&status=published
 export async function GET(req: NextRequest) {
@@ -87,6 +88,10 @@ export async function POST(req: NextRequest) {
       tags: data.tags || [],
     },
   });
+
+  if (post.status === 'PUBLISHED') {
+    notifyNewPost(post.title).catch(() => {});
+  }
 
   return NextResponse.json({ post }, { status: 201 });
 }

@@ -6,6 +6,7 @@ import { prisma } from '@/lib/db';
 import { getAuthUser, requireRole } from '@/lib/auth';
 import { UserRole } from '@prisma/client';
 import { analyzeRegulation } from '@/modules/ai-engine';
+import { notifyRegulationUpdate } from '@/lib/notifications';
 
 const updateRegulationSchema = z.object({
   title: z.string().min(1).max(500).optional(),
@@ -75,6 +76,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
         eventDate: new Date(),
       },
     });
+    notifyRegulationUpdate(oldReg.title, oldReg.status, status!).catch(() => {});
   }
 
   return NextResponse.json({ regulation });

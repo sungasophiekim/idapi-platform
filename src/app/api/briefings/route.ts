@@ -5,6 +5,7 @@ import { prisma } from '@/lib/db';
 import { getAuthUser, requireRole } from '@/lib/auth';
 import { UserRole } from '@prisma/client';
 import { generateDailyBriefing } from '@/modules/ai-engine';
+import { notifyNewBriefing } from '@/lib/notifications';
 
 // GET /api/briefings — list briefings (public: published only, admin: all)
 export async function GET(req: NextRequest) {
@@ -72,8 +73,9 @@ export async function POST(req: NextRequest) {
       },
     });
 
+    notifyNewBriefing(result.title).catch(() => {});
     return NextResponse.json({ briefing }, { status: 201 });
-  } catch (e: any) {
-    return NextResponse.json({ error: 'Briefing generation failed', message: e.message }, { status: 500 });
+  } catch {
+    return NextResponse.json({ error: 'Briefing generation failed' }, { status: 500 });
   }
 }
