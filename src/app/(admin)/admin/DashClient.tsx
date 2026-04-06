@@ -9,7 +9,10 @@ const CATEGORIES: Record<string, string> = {
 };
 
 export default function AdminDashClient({ stats, recentPosts }: {
-  stats: { postCount: number; publishedCount: number; teamCount: number; totalViews: number };
+  stats: {
+    postCount: number; publishedCount: number; teamCount: number; totalViews: number;
+    regulationCount: number; trendCount: number; briefingCount: number;
+  };
   recentPosts: any[];
 }) {
   const cards = [
@@ -17,13 +20,16 @@ export default function AdminDashClient({ stats, recentPosts }: {
     { label: 'Published', value: stats.publishedCount, color: 'text-blue-600' },
     { label: 'Team Members', value: stats.teamCount, color: 'text-amber-600' },
     { label: 'Total Views', value: stats.totalViews, color: 'text-purple-600' },
+    { label: 'Regulations', value: stats.regulationCount, color: 'text-rose-600' },
+    { label: 'Active Trends', value: stats.trendCount, color: 'text-cyan-600' },
+    { label: 'Briefings', value: stats.briefingCount, color: 'text-indigo-600' },
   ];
 
   return (
     <div>
       <h1 className="text-2xl font-bold mb-6">Dashboard</h1>
 
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 mb-8">
         {cards.map(c => (
           <div key={c.label} className="bg-white border border-border rounded-xl p-5">
             <div className="text-[12px] text-gray-400 mb-1">{c.label}</div>

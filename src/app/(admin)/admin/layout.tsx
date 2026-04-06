@@ -11,6 +11,7 @@ const NAV = [
   { href: '/admin/posts', icon: 'file', label: 'Posts' },
   { href: '/admin/team', icon: 'users', label: 'Team' },
   { href: '/admin/regulations', icon: 'globe', label: 'Regulations' },
+  { href: '/admin/bills', icon: 'shield', label: 'Bill Collector' },
   { href: '/admin/trends', icon: 'search', label: 'Trends' },
   { href: '/admin/briefings', icon: 'file', label: 'Briefings' },
   { href: '/admin/users', icon: 'users', label: 'Users' },

@@ -19,7 +19,7 @@ export async function POST(req: NextRequest) {
   // Rate limit check (simple: by IP, future: by subscription tier)
   // For now, just check API key exists
   if (!process.env.ANTHROPIC_API_KEY) {
-    return NextResponse.json({ error: 'AI engine not configured' }, { status: 503 });
+    return NextResponse.json({ error: 'AI 분석 엔진이 아직 설정되지 않았습니다. 관리자에게 문의해주세요. (ANTHROPIC_API_KEY required)' }, { status: 503 });
   }
 
   const body = await req.json();
@@ -52,6 +52,6 @@ export async function POST(req: NextRequest) {
       }
     }
   } catch (err: any) {
-    return NextResponse.json({ error: 'Analysis failed', message: err.message }, { status: 500 });
+    return NextResponse.json({ error: 'Analysis failed' }, { status: 500 });
   }
 }
