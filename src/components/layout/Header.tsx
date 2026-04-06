@@ -57,6 +57,11 @@ export default function Header() {
               </button>
             ))}
           </div>
+
+          {/* Admin */}
+          <Link href="/admin" className="px-3 py-1.5 bg-green-deep text-white text-[12px] font-bold rounded-md hover:bg-green-light transition-colors">
+            Admin
+          </Link>
         </nav>
 
         {/* Mobile Menu Button */}
@@ -74,13 +79,17 @@ export default function Header() {
               {item.label}
             </Link>
           ))}
-          <div className="flex gap-2 pt-2">
+          <div className="flex gap-2 pt-2 items-center">
             {(['ko', 'en'] as const).map(l => (
               <button key={l} onClick={() => { setLang(l); setMobileOpen(false); }}
                 className={`px-3 py-1.5 text-xs font-bold rounded ${lang === l ? 'bg-green-deep text-white' : 'bg-gray-100 text-gray-500'}`}>
                 {l === 'ko' ? '한국어' : 'English'}
               </button>
             ))}
+            <Link href="/admin" onClick={() => setMobileOpen(false)}
+              className="ml-auto px-3 py-1.5 bg-green-deep text-white text-xs font-bold rounded">
+              Admin
+            </Link>
           </div>
         </nav>
       )}
