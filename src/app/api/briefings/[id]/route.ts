@@ -1,9 +1,21 @@
 // src/app/api/briefings/[id]/route.ts
 
 import { NextRequest, NextResponse } from 'next/server';
+import { z } from 'zod';
 import { prisma } from '@/lib/db';
 import { getAuthUser, requireRole } from '@/lib/auth';
 import { UserRole } from '@prisma/client';
+
+const updateBriefingSchema = z.object({
+  title: z.string().min(1).max(500).optional(),
+  titleEn: z.string().max(500).optional().nullable(),
+  content: z.string().max(50000).optional(),
+  contentEn: z.string().max(50000).optional().nullable(),
+  type: z.enum(['daily', 'weekly', 'alert']).optional(),
+  isPublished: z.boolean().optional(),
+  publishedAt: z.string().optional().nullable(),
+  regulationIds: z.array(z.string()).optional(),
+}).strict();
 
 export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -21,12 +33,20 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
   const { id } = await params;
   const body = await req.json();
 
-  delete body.id;
-  delete body.createdAt;
+  const parsed = updateBriefingSchema.safeParse(body);
+  if (!parsed.success) {
+    return NextResponse.json({ error: 'Validation failed', details: parsed.error.flatten() }, { status: 400 });
+  }
 
-  if (body.publishedAt) body.publishedAt = new Date(body.publishedAt);
+  const { publishedAt, ...rest } = parsed.data;
+  const briefing = await prisma.aiBriefing.update({
+    where: { id },
+    data: {
+      ...rest,
+      ...(publishedAt !== undefined ? { publishedAt: publishedAt ? new Date(publishedAt) : null } : {}),
+    },
+  });
 
-  const briefing = await prisma.aiBriefing.update({ where: { id }, data: body });
   return NextResponse.json({ briefing });
 }
 

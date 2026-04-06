@@ -7,7 +7,10 @@ import jwt from 'jsonwebtoken';
 import { cookies } from 'next/headers';
 import { UserRole } from '@prisma/client';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'idapi-dev-secret-change-in-prod';
+const JWT_SECRET: string = process.env.JWT_SECRET || (() => {
+  console.error('FATAL: JWT_SECRET environment variable is not set');
+  return 'MISSING-JWT-SECRET-SET-ENV-VAR';
+})();
 const SESSION_DURATION = 7 * 24 * 60 * 60 * 1000; // 7 days
 
 export interface AuthUser {

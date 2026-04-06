@@ -1,10 +1,28 @@
 // src/app/api/regulations/[id]/route.ts
 
 import { NextRequest, NextResponse } from 'next/server';
+import { z } from 'zod';
 import { prisma } from '@/lib/db';
 import { getAuthUser, requireRole } from '@/lib/auth';
 import { UserRole } from '@prisma/client';
 import { analyzeRegulation } from '@/modules/ai-engine';
+
+const updateRegulationSchema = z.object({
+  title: z.string().min(1).max(500).optional(),
+  titleEn: z.string().max(500).optional().nullable(),
+  summary: z.string().max(5000).optional().nullable(),
+  summaryEn: z.string().max(5000).optional().nullable(),
+  jurisdiction: z.enum(['KR', 'US', 'EU', 'SG', 'JP', 'UK', 'HK', 'INTL']).optional(),
+  status: z.enum(['PROPOSED', 'COMMITTEE', 'FLOOR_VOTE', 'PASSED', 'ENACTED', 'REJECTED', 'WITHDRAWN']).optional(),
+  sourceUrl: z.string().url().optional().nullable(),
+  sourceName: z.string().max(200).optional().nullable(),
+  billNumber: z.string().max(100).optional().nullable(),
+  tags: z.array(z.string()).optional(),
+  researchArea: z.enum(['KOREA_POLICY', 'DIGITAL_FINANCE', 'INFRASTRUCTURE', 'INCLUSION']).optional().nullable(),
+  rawContent: z.string().max(50000).optional().nullable(),
+  proposedDate: z.string().optional().nullable(),
+  enactedDate: z.string().optional().nullable(),
+}).strict();
 
 export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -24,19 +42,26 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
 
   const { id } = await params;
   const body = await req.json();
+
+  const parsed = updateRegulationSchema.safeParse(body);
+  if (!parsed.success) {
+    return NextResponse.json({ error: 'Validation failed', details: parsed.error.flatten() }, { status: 400 });
+  }
+
   const oldReg = await prisma.regulation.findUnique({ where: { id } });
   if (!oldReg) return NextResponse.json({ error: 'Not found' }, { status: 404 });
 
-  // If status changed, create a timeline event
-  const statusChanged = body.status && body.status !== oldReg.status;
+  const { proposedDate, enactedDate, status, ...rest } = parsed.data;
+  const statusChanged = status && status !== oldReg.status;
 
   const regulation = await prisma.regulation.update({
     where: { id },
     data: {
-      ...body,
+      ...rest,
+      ...(status ? { status } : {}),
       lastUpdatedDate: new Date(),
-      proposedDate: body.proposedDate ? new Date(body.proposedDate) : undefined,
-      enactedDate: body.enactedDate ? new Date(body.enactedDate) : undefined,
+      ...(proposedDate !== undefined ? { proposedDate: proposedDate ? new Date(proposedDate) : null } : {}),
+      ...(enactedDate !== undefined ? { enactedDate: enactedDate ? new Date(enactedDate) : null } : {}),
     },
   });
 
@@ -44,9 +69,9 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
     await prisma.regulationEvent.create({
       data: {
         regulationId: id,
-        status: body.status,
-        description: `상태 변경: ${oldReg.status} → ${body.status}`,
-        descriptionEn: `Status changed: ${oldReg.status} → ${body.status}`,
+        status: status!,
+        description: `상태 변경: ${oldReg.status} → ${status}`,
+        descriptionEn: `Status changed: ${oldReg.status} → ${status}`,
         eventDate: new Date(),
       },
     });
@@ -79,8 +104,8 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       },
     });
     return NextResponse.json({ regulation: updated, analysis });
-  } catch (e: any) {
-    return NextResponse.json({ error: 'AI analysis failed', message: e.message }, { status: 500 });
+  } catch {
+    return NextResponse.json({ error: 'AI analysis failed' }, { status: 500 });
   }
 }
 

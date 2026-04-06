@@ -1,9 +1,27 @@
 // src/app/api/posts/[id]/route.ts
 
 import { NextRequest, NextResponse } from 'next/server';
+import { z } from 'zod';
 import { prisma } from '@/lib/db';
 import { getAuthUser, requireRole } from '@/lib/auth';
 import { UserRole } from '@prisma/client';
+
+const updatePostSchema = z.object({
+  title: z.string().min(1).max(300).optional(),
+  titleEn: z.string().max(300).optional(),
+  slug: z.string().max(200).optional(),
+  excerpt: z.string().max(2000).optional(),
+  excerptEn: z.string().max(2000).optional(),
+  content: z.string().optional(),
+  contentEn: z.string().optional(),
+  category: z.enum(['COMMENTARY', 'POLICY_BRIEF', 'PRESS_RELEASE', 'SEMINAR', 'REPORT']).optional(),
+  researchArea: z.enum(['KOREA_POLICY', 'DIGITAL_FINANCE', 'INFRASTRUCTURE', 'INCLUSION']).optional(),
+  status: z.enum(['DRAFT', 'REVIEW', 'PUBLISHED', 'ARCHIVED']).optional(),
+  teamAuthorId: z.string().optional(),
+  featuredImage: z.string().url().optional().nullable(),
+  tags: z.array(z.string()).optional(),
+  publishedAt: z.string().optional().nullable(),
+}).strict();
 
 // GET /api/posts/:id — public
 export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -34,11 +52,17 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
   const { id } = await params;
   const body = await req.json();
 
+  const parsed = updatePostSchema.safeParse(body);
+  if (!parsed.success) {
+    return NextResponse.json({ error: 'Validation failed', details: parsed.error.flatten() }, { status: 400 });
+  }
+
+  const { publishedAt, ...rest } = parsed.data;
   const post = await prisma.post.update({
     where: { id },
     data: {
-      ...body,
-      publishedAt: body.publishedAt ? new Date(body.publishedAt) : undefined,
+      ...rest,
+      ...(publishedAt !== undefined ? { publishedAt: publishedAt ? new Date(publishedAt) : null } : {}),
       updatedAt: new Date(),
     },
   });
