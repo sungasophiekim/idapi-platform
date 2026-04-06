@@ -14,6 +14,7 @@ const NAV = [
   { href: '/admin/bills', icon: 'shield', label: 'Bill Collector' },
   { href: '/admin/trends', icon: 'search', label: 'Trends' },
   { href: '/admin/briefings', icon: 'file', label: 'Briefings' },
+  { href: '/admin/consult', icon: 'shield', label: 'Consulting' },
   { href: '/admin/users', icon: 'users', label: 'Users' },
   { href: '/admin/settings', icon: 'settings', label: 'Settings' },
 ];

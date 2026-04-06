@@ -3,6 +3,10 @@ import { prisma } from '@/lib/db';
 import AdminDashClient from './DashClient';
 
 export default async function AdminDashboard() {
+  // Law count from static module
+  const { CURRENT_LAWS } = await import('@/modules/reg-consulting/law-matrix');
+  const lawCount = CURRENT_LAWS.length;
+
   const [postCount, publishedCount, teamCount, totalViews, regulationCount, trendCount, briefingCount, recentPosts] = await Promise.all([
     prisma.post.count(),
     prisma.post.count({ where: { status: 'PUBLISHED' } }),
@@ -28,6 +32,7 @@ export default async function AdminDashboard() {
         regulationCount,
         trendCount,
         briefingCount,
+        lawCount,
       }}
       recentPosts={JSON.parse(JSON.stringify(recentPosts))}
     />

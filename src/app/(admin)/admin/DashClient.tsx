@@ -11,7 +11,7 @@ const CATEGORIES: Record<string, string> = {
 export default function AdminDashClient({ stats, recentPosts }: {
   stats: {
     postCount: number; publishedCount: number; teamCount: number; totalViews: number;
-    regulationCount: number; trendCount: number; briefingCount: number;
+    regulationCount: number; trendCount: number; briefingCount: number; lawCount: number;
   };
   recentPosts: any[];
 }) {
@@ -23,6 +23,7 @@ export default function AdminDashClient({ stats, recentPosts }: {
     { label: 'Regulations', value: stats.regulationCount, color: 'text-rose-600' },
     { label: 'Active Trends', value: stats.trendCount, color: 'text-cyan-600' },
     { label: 'Briefings', value: stats.briefingCount, color: 'text-indigo-600' },
+    { label: 'Law Matrix', value: stats.lawCount, color: 'text-teal-600' },
   ];
 
   return (
