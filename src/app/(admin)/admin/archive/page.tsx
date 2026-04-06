@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Badge, Icon, InputField } from '@/components/ui';
+import { Badge, Icon, InputField, Btn, SelectField } from '@/components/ui';
 
 interface Law {
   id: string;
@@ -38,6 +38,32 @@ export default function AdminArchivePage() {
   const [searchKeyword, setSearchKeyword] = useState('');
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [collecting, setCollecting] = useState(false);
+  const [collectResult, setCollectResult] = useState<any>(null);
+  const [collectForm, setCollectForm] = useState({ jurisdiction: 'KR', lawName: '', shortName: '', regulator: '' });
+
+  const runCollect = async (preset?: string) => {
+    setCollecting(true);
+    setCollectResult(null);
+    try {
+      const body = preset ? { preset } : { ...collectForm };
+      const res = await fetch('/api/archive/collect', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+      const data = await res.json();
+      setCollectResult(data);
+      // Reload stats and laws
+      const [lawData, statsData] = await Promise.all([
+        fetch('/api/archive').then(r => r.json()),
+        fetch('/api/archive/stats').then(r => r.json()),
+      ]);
+      setLaws(lawData.laws || []);
+      setStats(statsData);
+    } catch { setCollectResult({ error: 'Collection failed' }); }
+    setCollecting(false);
+  };
 
   useEffect(() => {
     Promise.all([
@@ -69,8 +95,47 @@ export default function AdminArchivePage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold mb-2">Law Archive</h1>
-      <p className="text-sm text-gray-400 mb-6">조문 단위 법률 아카이브 — AI 컨텍스트 소스</p>
+      <div className="flex justify-between items-center mb-2">
+        <div>
+          <h1 className="text-2xl font-bold">Law Archive</h1>
+          <p className="text-sm text-gray-400 mt-1">조문 단위 법률 아카이브 — AI 컨텍스트 소스</p>
+        </div>
+        <Btn onClick={() => runCollect('korean-all')} disabled={collecting} size="sm">
+          {collecting ? <><span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Collecting...</> : <><Icon name="search" size={14} /> Collect KR Laws</>}
+        </Btn>
+      </div>
+
+      {/* Collection Result */}
+      {collectResult && (
+        <div className={`mb-4 p-4 rounded-xl border text-sm ${collectResult.error ? 'bg-red-50 border-red-200 text-red-700' : 'bg-green-50 border-green-200 text-green-800'}`}>
+          {collectResult.error ? collectResult.error : collectResult.results ? (
+            <div>
+              <p className="font-semibold">Collection complete</p>
+              {collectResult.results.map((r: any, i: number) => (
+                <p key={i}>{r.success ? '✓' : '✗'} {r.title} — {r.articleCount || 0} articles {r.error && `(${r.error})`}</p>
+              ))}
+            </div>
+          ) : (
+            <p>{collectResult.success ? '✓' : '✗'} {collectResult.title} — {collectResult.articleCount || 0} articles</p>
+          )}
+        </div>
+      )}
+
+      {/* Manual Collection Form */}
+      <div className="bg-white border border-border rounded-xl p-5 mb-6">
+        <h3 className="text-sm font-bold mb-3">수동 수집 — 법률명으로 검색</h3>
+        <div className="flex gap-3 items-end">
+          <div className="w-32">
+            <SelectField label="Jurisdiction" value={collectForm.jurisdiction} onChange={v => setCollectForm({...collectForm, jurisdiction: v})} options={[
+              {value:'KR',label:'🇰🇷 Korea'},{value:'US',label:'🇺🇸 USA'},{value:'EU',label:'🇪🇺 EU'},{value:'SG',label:'🇸🇬 SG'},{value:'JP',label:'🇯🇵 JP'},{value:'HK',label:'🇭🇰 HK'},
+            ]} />
+          </div>
+          <div className="flex-1">
+            <InputField label="Law Name" value={collectForm.lawName} onChange={v => setCollectForm({...collectForm, lawName: v})} placeholder="e.g. 전자금융거래법" />
+          </div>
+          <Btn onClick={() => runCollect()} disabled={collecting || !collectForm.lawName} size="sm" style={{marginBottom: 16}}>Collect</Btn>
+        </div>
+      </div>
 
       {/* Stats */}
       {stats && (
