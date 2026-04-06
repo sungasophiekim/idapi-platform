@@ -20,6 +20,7 @@ export default function Header() {
   const navItems = [
     { href: '/about', label: t('About', 'About') },
     { href: '/dashboard', label: t('대시보드', 'Dashboard') },
+    { href: '/analyze', label: t('AI 분석', 'AI Analyzer') },
     { href: '/research', label: t('연구자료', 'Research') },
     { href: '/team', label: t('팀 소개', 'Team') },
   ];
