@@ -13,6 +13,7 @@ const NAV = [
   { href: '/admin/regulations', icon: 'globe', label: 'Regulations' },
   { href: '/admin/trends', icon: 'search', label: 'Trends' },
   { href: '/admin/briefings', icon: 'file', label: 'Briefings' },
+  { href: '/admin/users', icon: 'users', label: 'Users' },
   { href: '/admin/settings', icon: 'settings', label: 'Settings' },
 ];
 
