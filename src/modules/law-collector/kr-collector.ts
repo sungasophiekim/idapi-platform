@@ -35,7 +35,7 @@ interface SaveOptions {
 
 // ─── Constants ───────────────────────────────────────────────────────────────
 
-const API_KEY = process.env.LAW_GO_KR_API_KEY || 'test';
+const API_KEY = process.env.LAW_GO_KR_API_KEY || 'chetera';
 const SEARCH_ENDPOINT = 'https://www.law.go.kr/DRF/lawSearch.do';
 const DETAIL_ENDPOINT = 'https://www.law.go.kr/DRF/lawService.do';
 
@@ -108,9 +108,9 @@ export async function searchKoreanLaw(query: string): Promise<SearchResult[]> {
       return [];
     }
     return altBlocks.map((block) => ({
-      id: xmlTag(block, '법령ID') || xmlTag(block, 'lawId') || xmlTag(block, '법령MST') || '',
-      name: decodeXmlEntities(xmlTag(block, '법령명') || xmlTag(block, 'lawNm') || ''),
-      lawNumber: decodeXmlEntities(xmlTag(block, '법령번호') || xmlTag(block, 'lawNo') || ''),
+      id: xmlTag(block, '법령일련번호') || xmlTag(block, '법령ID') || xmlTag(block, 'lawId') || '',
+      name: decodeXmlEntities(xmlTag(block, '법령명한글') || xmlTag(block, '법령명') || ''),
+      lawNumber: decodeXmlEntities(xmlTag(block, '공포번호') || xmlTag(block, '법령번호') || ''),
     }));
   }
 
@@ -155,10 +155,11 @@ function parseArticlesFromXml(xml: string): CollectedLaw['articles'] {
         );
 
         if (articleNum || content) {
+          const num = articleNum.match(/\d+/) ? `제${articleNum}조` : articleNum;
           articles.push({
-            articleNum: articleNum || `제${idx + 1}조`,
+            articleNum: num || `제${idx + 1}조`,
             articleTitle: articleTitle || undefined,
-            content,
+            content: content.replace(/^제\d+조(\([^)]*\))?\s*/, '').trim() || content,
             chapter: currentChapter || undefined,
             sortOrder: idx + 1,
           });
@@ -226,7 +227,7 @@ export async function fetchKoreanLawFull(lawId: string): Promise<CollectedLaw | 
   url.searchParams.set('OC', API_KEY);
   url.searchParams.set('target', 'law');
   url.searchParams.set('type', 'XML');
-  url.searchParams.set('ID', lawId);
+  url.searchParams.set('MST', lawId);
 
   console.log(`[kr-collector] Fetching law detail for ID: ${lawId}`);
 
@@ -243,7 +244,7 @@ export async function fetchKoreanLawFull(lawId: string): Promise<CollectedLaw | 
     xmlTag(xml, '법령명_한글') || xmlTag(xml, '법령명') || xmlTag(xml, '법령명한글') || ''
   );
   const lawNumber = decodeXmlEntities(
-    xmlTag(xml, '법령번호') || xmlTag(xml, '법령ID') || ''
+    xmlTag(xml, '공포번호') || xmlTag(xml, '법령번호') || xmlTag(xml, '법령ID') || ''
   );
   const enactedDate = xmlTag(xml, '제정일자') || xmlTag(xml, '공포일자') || '';
   const effectiveDate = xmlTag(xml, '시행일자') || '';
