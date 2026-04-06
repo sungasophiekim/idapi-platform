@@ -291,6 +291,62 @@ model PolicyTrend {
 }
 
 // ═══════════════════════════════════════════════════════════════
+// LAW ARCHIVE — Structured full-text law database
+// ═══════════════════════════════════════════════════════════════
+
+// A complete law/regulation (e.g. "가상자산이용자보호법")
+model LawArchive {
+  id              String       @id @default(cuid())
+  jurisdiction    Jurisdiction
+  lawType         String       // "law" | "decree" | "regulation" | "guideline" | "bill"
+  title           String       // Official title (KO)
+  titleEn         String?      // Official title (EN)
+  shortName       String?      // Common abbreviation (e.g. "가상자산보호법")
+  lawNumber       String?      // Official number (e.g. "법률 제19947호")
+  enactedDate     DateTime?
+  effectiveDate   DateTime?    // 시행일
+  lastAmendedDate DateTime?
+  status          String       @default("enacted") // enacted, amended, pending, repealed
+  regulator       String?      // 소관부처 (e.g. "금융위원회")
+  sourceUrl       String?      // Link to official source
+  fullText        String?      @db.Text    // Full raw text (for search/backup)
+  fullTextEn      String?      @db.Text    // English full text if available
+  totalArticles   Int?         // Total number of articles/조
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+
+  // Relations
+  articles        LawArticle[]
+  regulationId    String?      // Link back to Regulation tracker if applicable
+
+  @@unique([jurisdiction, lawNumber])
+  @@index([jurisdiction, status])
+  @@index([title])
+  @@map("law_archives")
+}
+
+// Individual article/clause within a law (조문 단위)
+model LawArticle {
+  id           String     @id @default(cuid())
+  lawId        String
+  articleNum   String     // "제1조", "제6조제1항", "Article 3(1)"
+  articleTitle String?    // 조문 제목 (e.g. "예치금의 보호")
+  content      String     @db.Text    // Full article text (KO)
+  contentEn    String?    @db.Text    // English translation
+  chapter      String?    // 장/편 (e.g. "제2장 이용자 자산의 보호")
+  sortOrder    Int        @default(0)
+  tags         String[]   // Auto-extracted keywords for this article
+  appliesToBiz String[]   // Business types this article affects
+  createdAt    DateTime   @default(now())
+
+  law          LawArchive @relation(fields: [lawId], references: [id], onDelete: Cascade)
+
+  @@index([lawId, sortOrder])
+  @@index([tags])
+  @@map("law_articles")
+}
+
+// ═══════════════════════════════════════════════════════════════
 // PHASE 3+ RESERVED TABLES
 // ═══════════════════════════════════════════════════════════════
 
