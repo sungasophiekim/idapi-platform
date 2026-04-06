@@ -26,6 +26,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const pathname = usePathname();
 
   useEffect(() => {
+    // Skip auth check on login page
+    if (pathname === '/admin/login') {
+      setLoading(false);
+      return;
+    }
     fetch('/api/auth/me').then(r => r.json()).then(d => {
       if (!d.user || !['ADMIN', 'RESEARCHER', 'EDITOR'].includes(d.user.role)) {
         router.push('/admin/login');
@@ -34,7 +39,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       }
       setLoading(false);
     }).catch(() => { router.push('/admin/login'); setLoading(false); });
-  }, [router]);
+  }, [router, pathname]);
 
   const handleLogout = async () => {
     await fetch('/api/auth/logout', { method: 'POST' });
@@ -42,6 +47,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   };
 
   if (loading) return <div className="min-h-screen flex items-center justify-center text-gray-400">Loading...</div>;
+  if (pathname === '/admin/login') return <>{children}</>;
   if (!user) return null;
 
   return (
