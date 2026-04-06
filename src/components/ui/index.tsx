@@ -48,14 +48,15 @@ interface InputFieldProps {
 }
 
 export function InputField({ label, multiline, value, onChange, placeholder, type = 'text' }: InputFieldProps) {
+  const id = label ? `input-${label.toLowerCase().replace(/[^a-z0-9]/g, '-')}` : undefined;
   const cls = 'w-full px-3.5 py-2.5 rounded-lg border border-gray-200 text-sm focus:outline-none focus:border-green-deep/40 transition-colors bg-white';
   return (
     <div className="mb-4">
-      {label && <label className="block mb-1.5 text-[13px] font-semibold text-gray-700">{label}</label>}
+      {label && <label htmlFor={id} className="block mb-1.5 text-[13px] font-semibold text-gray-700">{label}</label>}
       {multiline ? (
-        <textarea className={`${cls} min-h-[120px] resize-y`} value={value} onChange={e => onChange(e.target.value)} placeholder={placeholder} />
+        <textarea id={id} className={`${cls} min-h-[120px] resize-y`} value={value} onChange={e => onChange(e.target.value)} placeholder={placeholder} aria-label={label || placeholder} />
       ) : (
-        <input className={cls} type={type} value={value} onChange={e => onChange(e.target.value)} placeholder={placeholder} />
+        <input id={id} className={cls} type={type} value={value} onChange={e => onChange(e.target.value)} placeholder={placeholder} aria-label={label || placeholder} />
       )}
     </div>
   );
@@ -70,10 +71,11 @@ interface SelectFieldProps {
 }
 
 export function SelectField({ label, value, onChange, options }: SelectFieldProps) {
+  const id = label ? `select-${label.toLowerCase().replace(/[^a-z0-9]/g, '-')}` : undefined;
   return (
     <div className="mb-4">
-      {label && <label className="block mb-1.5 text-[13px] font-semibold text-gray-700">{label}</label>}
-      <select className="w-full px-3.5 py-2.5 rounded-lg border border-gray-200 text-sm bg-white focus:outline-none focus:border-green-deep/40" value={value} onChange={e => onChange(e.target.value)}>
+      {label && <label htmlFor={id} className="block mb-1.5 text-[13px] font-semibold text-gray-700">{label}</label>}
+      <select id={id} className="w-full px-3.5 py-2.5 rounded-lg border border-gray-200 text-sm bg-white focus:outline-none focus:border-green-deep/40" value={value} onChange={e => onChange(e.target.value)} aria-label={label}>
         {options.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
       </select>
     </div>
@@ -99,9 +101,9 @@ const PATHS: Record<string, React.ReactNode> = {
   search: <><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></>,
 };
 
-export function Icon({ name, size = 18, className = '' }: { name: string; size?: number; className?: string }) {
+export function Icon({ name, size = 18, className = '', label }: { name: string; size?: number; className?: string; label?: string }) {
   return (
-    <svg viewBox="0 0 24 24" width={size} height={size} fill="none" stroke="currentColor" strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round" className={className}>
+    <svg viewBox="0 0 24 24" width={size} height={size} fill="none" stroke="currentColor" strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden={!label} aria-label={label} role={label ? 'img' : 'presentation'}>
       {PATHS[name] || null}
     </svg>
   );
