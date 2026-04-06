@@ -1,8 +1,13 @@
-import { NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
+// src/app/api/auth/logout/route.ts
 
-export async function POST() {
-  const cookieStore = await cookies();
-  cookieStore.delete('idapi_token');
-  return NextResponse.json({ success: true });
+import { NextRequest, NextResponse } from 'next/server';
+import { logout } from '@/lib/auth';
+
+export async function POST(req: NextRequest) {
+  const token = req.cookies.get('idapi_token')?.value;
+  if (token) await logout(token);
+
+  const response = NextResponse.json({ success: true });
+  response.cookies.delete('idapi_token');
+  return response;
 }

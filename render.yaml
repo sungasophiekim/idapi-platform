@@ -1,20 +1,52 @@
+# render.yaml — Infrastructure as Code for Render
+# Deploy: connect GitHub repo > Render auto-detects this file
+
 services:
   - type: web
     name: idapi-platform
     runtime: node
-    buildCommand: npm install && npx prisma generate && npm run build
+    plan: starter  # $7/mo — always on, no sleep
+    buildCommand: npm install && npm run build
     startCommand: npm start
-    healthCheckPath: /api/health
     envVars:
-      - key: NODE_VERSION
-        value: 22.12.0
       - key: DATABASE_URL
-        sync: false
+        sync: false  # Set manually in Render dashboard
       - key: DIRECT_URL
-        sync: false
-      - key: JWT_SECRET
         sync: false
       - key: NEXT_PUBLIC_SUPABASE_URL
         sync: false
       - key: NEXT_PUBLIC_SUPABASE_ANON_KEY
         sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true  # Render auto-generates
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: CRON_SECRET
+        generateValue: true
+      - key: NODE_ENV
+        value: production
+      - key: NEXT_PUBLIC_APP_URL
+        value: https://idapi-platform.onrender.com
+    healthCheckPath: /api/health
+    autoDeploy: true  # Auto-deploy on git push
+
+# ─── Cron Jobs ───
+# Trend detection: runs every 6 hours
+  - type: cron
+    name: idapi-trend-cron
+    runtime: node
+    schedule: "0 0,6,12,18 * * *"  # Every 6 hours: midnight, 6am, noon, 6pm
+    buildCommand: npm install
+    startCommand: |
+      curl -X POST https://idapi-platform.onrender.com/api/trends/detect \
+        -H "Content-Type: application/json" \
+        -H "x-cron-secret: $CRON_SECRET" \
+        -d '{"maxAgeDays": 7}'
+    envVars:
+      - key: CRON_SECRET
+        fromService:
+          name: idapi-platform
+          type: web
+          envVarKey: CRON_SECRET

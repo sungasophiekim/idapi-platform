@@ -1,11 +1,22 @@
+// ═══════════════════════════════════════════════════════════════
+// IDAPI Platform - Database Schema
+// Phase 1: Foundation (Users, Team, Posts, Settings)
+// Designed for forward-compatibility with Phase 2-4
+// ═══════════════════════════════════════════════════════════════
+
 generator client {
-  provider = "prisma-client"
-  output   = "../src/generated/prisma"
+  provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "postgresql"
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL") // Supabase requires both pooled + direct
 }
+
+// ─── AUTH & USERS ───────────────────────────────────────────
+// Phase 1: Basic auth with role-based access
+// Phase 3: Extends with community roles (participant, contributor, supporter, fellow)
 
 enum UserRole {
   ADMIN
@@ -14,44 +25,23 @@ enum UserRole {
   VIEWER
 }
 
-enum PostStatus {
-  DRAFT
-  PUBLISHED
-}
-
-enum PostCategory {
-  COMMENTARY
-  POLICY_BRIEF
-  PRESS
-  SEMINAR
-}
-
-enum ResearchArea {
-  KOREA_POLICY
-  DIGITAL_FINANCE
-  INFRASTRUCTURE
-  INCLUSION
-}
-
-enum TeamMemberType {
-  FOUNDER
-  FELLOW
-  ADVISOR
-}
-
 model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  password  String
-  name      String
-  nameEn    String?
-  role      UserRole @default(VIEWER)
-  avatar    String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id            String    @id @default(cuid())
+  email         String    @unique
+  passwordHash  String
+  name          String
+  nameEn        String?
+  role          UserRole  @default(VIEWER)
+  avatarUrl     String?
+  isActive      Boolean   @default(true)
+  lastLoginAt   DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
 
-  sessions    Session[]
-  teamProfile TeamMember?
+  // Relations
+  teamProfile   TeamMember?
+  posts         Post[]       @relation("PostAuthor")
+  sessions      Session[]
 
   @@map("users")
 }
@@ -66,66 +56,250 @@ model Session {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([token])
-  @@index([expiresAt])
+  @@index([userId])
   @@map("sessions")
 }
 
+// ─── TEAM / FELLOWS ─────────────────────────────────────────
+// Separate from User because external fellows may not have login accounts
+
+enum MemberType {
+  FOUNDER
+  FELLOW
+  ADVISOR
+  ASSOCIATE
+}
+
 model TeamMember {
-  id            String         @id @default(cuid())
-  userId        String?        @unique
-  name          String
-  nameEn        String?
-  title         String
-  titleEn       String?
-  bio           String
-  bioEn         String?
-  credentials   String[]
-  credentialsEn String[]
-  type          TeamMemberType @default(FELLOW)
-  order         Int            @default(0)
-  published     Boolean        @default(true)
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
+  id             String     @id @default(cuid())
+  userId         String?    @unique // nullable: external fellows don't need accounts
+  name           String
+  nameEn         String?
+  title          String
+  titleEn        String?
+  bio            String     @db.Text
+  bioEn          String?    @db.Text
+  credentials    String[]   // Array of credential strings (KO)
+  credentialsEn  String[]   // Array of credential strings (EN)
+  memberType     MemberType @default(FELLOW)
+  avatarUrl      String?
+  sortOrder      Int        @default(0)
+  isPublished    Boolean    @default(true)
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
 
+  // Relations
   user  User?  @relation(fields: [userId], references: [id], onDelete: SetNull)
-  posts Post[]
+  posts Post[] @relation("PostTeamAuthor")
 
-  @@index([published, order])
+  @@index([isPublished, sortOrder])
   @@map("team_members")
 }
 
-model Post {
-  id           String       @id @default(cuid())
-  authorId     String
-  category     PostCategory
-  status       PostStatus   @default(DRAFT)
-  title        String
-  titleEn      String?
-  excerpt      String?
-  excerptEn    String?
-  content      String?
-  contentEn    String?
-  researchArea ResearchArea
-  publishedAt  DateTime?
-  views        Int          @default(0)
-  createdAt    DateTime     @default(now())
-  updatedAt    DateTime     @updatedAt
+// ─── POSTS / PUBLICATIONS ───────────────────────────────────
+// Core content system for research papers, briefs, commentary
 
-  author TeamMember @relation(fields: [authorId], references: [id])
+enum PostCategory {
+  COMMENTARY
+  POLICY_BRIEF
+  PRESS_RELEASE
+  SEMINAR
+  REPORT
+}
+
+enum ResearchArea {
+  KOREA_POLICY
+  DIGITAL_FINANCE
+  INFRASTRUCTURE
+  INCLUSION
+}
+
+enum PostStatus {
+  DRAFT
+  REVIEW
+  PUBLISHED
+  ARCHIVED
+}
+
+model Post {
+  id            String       @id @default(cuid())
+  slug          String       @unique
+  authorId      String?      // User who created
+  teamAuthorId  String?      // Team member shown as author
+  category      PostCategory
+  researchArea  ResearchArea
+  status        PostStatus   @default(DRAFT)
+
+  // Content (bilingual)
+  title         String
+  titleEn       String?
+  excerpt       String?      @db.Text
+  excerptEn     String?      @db.Text
+  content       String?      @db.Text    // Rich text / MDX content (KO)
+  contentEn     String?      @db.Text    // Rich text / MDX content (EN)
+
+  // Metadata
+  featuredImage String?
+  tags          String[]
+  viewCount     Int          @default(0)
+  publishedAt   DateTime?
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  // Relations
+  author      User?       @relation("PostAuthor", fields: [authorId], references: [id], onDelete: SetNull)
+  teamAuthor  TeamMember? @relation("PostTeamAuthor", fields: [teamAuthorId], references: [id], onDelete: SetNull)
 
   @@index([status, publishedAt(sort: Desc)])
   @@index([category])
   @@index([researchArea])
+  @@index([slug])
   @@map("posts")
 }
 
-model SiteSettings {
-  id              String   @id @default("default")
-  siteName        String   @default("IDAPI")
-  lang            String   @default("ko")
-  partnersVisible Boolean  @default(false)
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+// ─── SITE SETTINGS ──────────────────────────────────────────
+
+model SiteSetting {
+  id    String @id @default(cuid())
+  key   String @unique
+  value String @db.Text
 
   @@map("site_settings")
 }
+
+// ─── MEDIA / FILES ──────────────────────────────────────────
+// Track uploaded files (stored in Supabase Storage)
+
+model Media {
+  id          String   @id @default(cuid())
+  filename    String
+  mimeType    String
+  size        Int      // bytes
+  url         String
+  storagePath String   // Supabase storage path
+  uploadedBy  String?
+  createdAt   DateTime @default(now())
+
+  @@map("media")
+}
+
+// ═══════════════════════════════════════════════════════════════
+// PHASE 2: AI ENGINE & DASHBOARD
+// ═══════════════════════════════════════════════════════════════
+
+// Tracks legislation/regulation across jurisdictions
+enum RegulationStatus {
+  PROPOSED
+  COMMITTEE
+  FLOOR_VOTE
+  PASSED
+  ENACTED
+  REJECTED
+  WITHDRAWN
+}
+
+enum Jurisdiction {
+  KR    // South Korea
+  US    // United States
+  EU    // European Union
+  SG    // Singapore
+  JP    // Japan
+  UK    // United Kingdom
+  HK    // Hong Kong
+  INTL  // International bodies (FATF, BIS, IOSCO)
+}
+
+model Regulation {
+  id              String           @id @default(cuid())
+  jurisdiction    Jurisdiction
+  status          RegulationStatus @default(PROPOSED)
+  title           String
+  titleEn         String?
+  summary         String?          @db.Text
+  summaryEn       String?          @db.Text
+  aiSummary       String?          @db.Text    // AI-generated summary
+  sourceUrl       String?
+  sourceName      String?          // e.g. "금융위원회", "SEC", "EU Parliament"
+  billNumber      String?          // e.g. "의안번호 2200001"
+  tags            String[]
+  researchArea    ResearchArea?
+  impactScore     Int?             // AI-assessed 1-10 importance
+  proposedDate    DateTime?
+  lastUpdatedDate DateTime?
+  enactedDate     DateTime?
+  rawContent      String?          @db.Text    // Original scraped text
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+
+  // Relations
+  timelineEvents  RegulationEvent[]
+
+  @@index([jurisdiction, status])
+  @@index([researchArea])
+  @@index([impactScore(sort: Desc)])
+  @@map("regulations")
+}
+
+// Timeline events for each regulation (status changes)
+model RegulationEvent {
+  id           String           @id @default(cuid())
+  regulationId String
+  status       RegulationStatus
+  description  String?
+  descriptionEn String?
+  eventDate    DateTime
+  createdAt    DateTime         @default(now())
+
+  regulation   Regulation @relation(fields: [regulationId], references: [id], onDelete: Cascade)
+
+  @@index([regulationId, eventDate(sort: Desc)])
+  @@map("regulation_events")
+}
+
+// AI-generated daily/weekly briefings
+model AiBriefing {
+  id            String   @id @default(cuid())
+  type          String   // "daily" | "weekly" | "alert"
+  title         String
+  titleEn       String?
+  content       String   @db.Text
+  contentEn     String?  @db.Text
+  regulationIds String[] // Related regulation IDs (stored as array, not FK)
+  isPublished   Boolean  @default(false)
+  generatedAt   DateTime @default(now())
+  publishedAt   DateTime?
+  createdAt     DateTime @default(now())
+
+  @@index([type, isPublished])
+  @@map("ai_briefings")
+}
+
+// Trending policy topics (auto-detected by AI)
+model PolicyTrend {
+  id          String   @id @default(cuid())
+  keyword     String
+  keywordEn   String?
+  score       Float    // Trend intensity 0-100
+  mentions    Int      @default(0)
+  relatedTags String[]
+  detectedAt  DateTime @default(now())
+  expiresAt   DateTime // Trends expire after a period
+
+  @@index([score(sort: Desc)])
+  @@index([detectedAt(sort: Desc)])
+  @@map("policy_trends")
+}
+
+// ═══════════════════════════════════════════════════════════════
+// PHASE 3+ RESERVED TABLES
+// ═══════════════════════════════════════════════════════════════
+
+// Phase 3: Community & Policy Voice
+// model Survey            { ... }
+// model SurveyResponse    { ... }
+// model CommunityMember   { ... }
+// model PolicyVoicePoint  { ... }
+
+// Phase 4: Partners & Analytics
+// model Partner           { ... }
+// model AnalyticsEvent    { ... }

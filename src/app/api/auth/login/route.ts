@@ -1,44 +1,31 @@
+// src/app/api/auth/login/route.ts
+
 import { NextRequest, NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
-import { z } from 'zod';
-import { prisma } from '../../../../lib/db';
-import { verifyPassword, createToken } from '../../../../lib/auth';
+import { login } from '@/lib/auth';
 
-const schema = z.object({
-  email: z.string().email(),
-  password: z.string().min(1),
-});
+export async function POST(req: NextRequest) {
+  const { email, password } = await req.json();
 
-export async function POST(request: NextRequest) {
-  const body = await request.json();
-  const parsed = schema.safeParse(body);
-  if (!parsed.success) {
-    return NextResponse.json({ error: 'Validation failed', details: parsed.error.flatten() }, { status: 400 });
+  if (!email || !password) {
+    return NextResponse.json({ error: 'Email and password required' }, { status: 400 });
   }
 
-  const { email, password } = parsed.data;
-  const user = await prisma.user.findUnique({ where: { email } });
-  if (!user) {
-    return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 });
+  const result = await login(email, password);
+
+  if ('error' in result) {
+    return NextResponse.json({ error: result.error }, { status: 401 });
   }
 
-  const valid = await verifyPassword(password, user.password);
-  if (!valid) {
-    return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 });
-  }
+  const response = NextResponse.json({ user: result.user });
 
-  const token = createToken(user.id);
-
-  const cookieStore = await cookies();
-  cookieStore.set('idapi_token', token, {
+  // Set HTTP-only cookie
+  response.cookies.set('idapi_token', result.token, {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'lax',
-    maxAge: 60 * 60 * 24 * 7, // 7 days
+    maxAge: 7 * 24 * 60 * 60, // 7 days
     path: '/',
   });
 
-  return NextResponse.json({
-    user: { id: user.id, email: user.email, name: user.name, role: user.role },
-  });
+  return response;
 }
