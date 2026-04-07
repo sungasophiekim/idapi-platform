@@ -798,23 +798,58 @@ export async function collectKnownInternationalLaws(): Promise<{
   let failed = 0;
 
   const tasks: Array<{ name: string; fn: () => Promise<CollectedLaw | null> }> = [
-    // US — FinCEN BSA regulations
-    { name: 'US FinCEN BSA (31 CFR 1010)', fn: () => fetchUSRegulation(31, 1010) },
+    // ═══ US — FinCEN BSA Regulations (Title 31) ═══
+    { name: 'US FinCEN General (31 CFR 1010)', fn: () => fetchUSRegulation(31, 1010) },
+    { name: 'US FinCEN Banks (31 CFR 1020)', fn: () => fetchUSRegulation(31, 1020) },
     { name: 'US FinCEN MSB (31 CFR 1022)', fn: () => fetchUSRegulation(31, 1022) },
-    // US — SEC digital asset rules
-    { name: 'US SEC Reg ATS (17 CFR 242)', fn: () => fetchUSRegulation(17, 242) },
-    // EU — MiCA (Markets in Crypto-Assets Regulation)
-    { name: 'EU MiCA', fn: () => fetchEURegulation('32023R1114') },
-    // EU — Transfer of Funds Regulation (TFR / Travel Rule)
-    { name: 'EU TFR', fn: () => fetchEURegulation('32023R1113') },
-    // EU — DORA (Digital Operational Resilience Act)
-    { name: 'EU DORA', fn: () => fetchEURegulation('32022R2554') },
-    // Singapore — Payment Services Act
+    { name: 'US FinCEN Brokers (31 CFR 1023)', fn: () => fetchUSRegulation(31, 1023) },
+    { name: 'US FinCEN Mutual Funds (31 CFR 1024)', fn: () => fetchUSRegulation(31, 1024) },
+    { name: 'US FinCEN Insurance (31 CFR 1025)', fn: () => fetchUSRegulation(31, 1025) },
+    { name: 'US FinCEN Futures (31 CFR 1026)', fn: () => fetchUSRegulation(31, 1026) },
+
+    // ═══ US — SEC Securities Rules (Title 17 Chapter II) ═══
+    { name: 'US SEC Securities Act Rules (17 CFR 230)', fn: () => fetchUSRegulation(17, 230) },
+    { name: 'US SEC Exchange Act Rules (17 CFR 240)', fn: () => fetchUSRegulation(17, 240) },
+    { name: 'US SEC Reg ATS / NMS (17 CFR 242)', fn: () => fetchUSRegulation(17, 242) },
+    { name: 'US SEC Investment Advisers (17 CFR 275)', fn: () => fetchUSRegulation(17, 275) },
+    { name: 'US SEC Investment Company (17 CFR 270)', fn: () => fetchUSRegulation(17, 270) },
+
+    // ═══ US — CFTC Commodity Rules (Title 17 Chapter I) ═══
+    { name: 'US CFTC General (17 CFR 1)', fn: () => fetchUSRegulation(17, 1) },
+    { name: 'US CFTC Foreign Futures (17 CFR 30)', fn: () => fetchUSRegulation(17, 30) },
+    { name: 'US CFTC DCO Clearing (17 CFR 39)', fn: () => fetchUSRegulation(17, 39) },
+
+    // ═══ US — Banking & Consumer Protection ═══
+    { name: 'US CFPB Reg E (12 CFR 1005)', fn: () => fetchUSRegulation(12, 1005) },
+
+    // ═══ EU — Crypto-Specific Regulations ═══
+    { name: 'EU MiCA (2023/1114)', fn: () => fetchEURegulation('32023R1114') },
+    { name: 'EU TFR Travel Rule (2023/1113)', fn: () => fetchEURegulation('32023R1113') },
+    { name: 'EU DORA (2022/2554)', fn: () => fetchEURegulation('32022R2554') },
+    { name: 'EU DLT Pilot Regime (2022/858)', fn: () => fetchEURegulation('32022R0858') },
+
+    // ═══ EU — AML / KYC ═══
+    { name: 'EU AMLR 2024 (2024/1624)', fn: () => fetchEURegulation('32024R1624') },
+    { name: 'EU AMLD 6 (2024/1640)', fn: () => fetchEURegulation('32024L1640') },
+    { name: 'EU AMLD 5 (2018/843)', fn: () => fetchEURegulation('32018L0843') },
+    { name: 'EU AMLD 4 (2015/849)', fn: () => fetchEURegulation('32015L0849') },
+
+    // ═══ EU — Financial Services Framework ═══
+    { name: 'EU PSD2 (2015/2366)', fn: () => fetchEURegulation('32015L2366') },
+    { name: 'EU EMI Directive (2009/110)', fn: () => fetchEURegulation('32009L0110') },
+    { name: 'EU MiFID II (2014/65)', fn: () => fetchEURegulation('32014L0065') },
+    { name: 'EU CRR Capital (575/2013)', fn: () => fetchEURegulation('32013R0575') },
+    { name: 'EU GDPR (2016/679)', fn: () => fetchEURegulation('32016R0679') },
+    { name: 'EU Prospectus (2017/1129)', fn: () => fetchEURegulation('32017R1129') },
+
+    // ═══ Singapore — Payment Services Act ═══
     { name: 'SG Payment Services Act', fn: () => fetchSingaporeLaw('PSA2019') },
   ];
 
   for (const task of tasks) {
     try {
+      // Small delay to avoid rate limiting
+      await new Promise(r => setTimeout(r, 500));
       const law = await task.fn();
       if (law && law.articles.length > 0) {
         const result = await saveLawToArchive(law);
