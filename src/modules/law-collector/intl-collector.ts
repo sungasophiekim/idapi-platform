@@ -954,7 +954,7 @@ export async function collectKnownInternationalLaws(onlyMissing = false): Promis
       select: { lawNumber: true, _count: { select: { articles: true } } },
     });
     for (const e of existing) {
-      existingMap.set(e.lawNumber, e._count.articles);
+      if (e.lawNumber) existingMap.set(e.lawNumber, e._count.articles);
     }
   }
 
