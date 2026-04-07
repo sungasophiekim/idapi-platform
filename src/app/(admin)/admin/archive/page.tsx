@@ -42,12 +42,13 @@ export default function AdminArchivePage() {
   const [collectResult, setCollectResult] = useState<any>(null);
   const [collectForm, setCollectForm] = useState({ jurisdiction: 'KR', lawName: '', shortName: '', regulator: '' });
 
-  const runCollect = async (preset?: string) => {
+  const runCollect = async (preset?: string, intl?: boolean) => {
     setCollecting(true);
     setCollectResult(null);
     try {
-      const body = preset ? { preset } : { ...collectForm };
-      const res = await fetch('/api/archive/collect', {
+      const url = intl ? '/api/archive/collect-intl' : '/api/archive/collect';
+      const body = intl ? {} : preset ? { preset } : { ...collectForm };
+      const res = await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
@@ -100,15 +101,25 @@ export default function AdminArchivePage() {
           <h1 className="text-2xl font-bold">Law Archive</h1>
           <p className="text-sm text-gray-400 mt-1">조문 단위 법률 아카이브 — AI 컨텍스트 소스</p>
         </div>
-        <Btn onClick={() => runCollect('korean-all')} disabled={collecting} size="sm">
-          {collecting ? <><span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Collecting...</> : <><Icon name="search" size={14} /> Collect KR Laws</>}
-        </Btn>
+        <div className="flex gap-2">
+          <Btn onClick={() => runCollect('korean-all')} disabled={collecting} size="sm">
+            {collecting ? <><span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> ...</> : <><Icon name="search" size={14} /> Collect KR</>}
+          </Btn>
+          <Btn onClick={() => runCollect(undefined, true)} disabled={collecting} size="sm" variant="outline">
+            <Icon name="globe" size={14} /> Collect Intl
+          </Btn>
+        </div>
       </div>
 
       {/* Collection Result */}
       {collectResult && (
         <div className={`mb-4 p-4 rounded-xl border text-sm ${collectResult.error ? 'bg-red-50 border-red-200 text-red-700' : 'bg-green-50 border-green-200 text-green-800'}`}>
-          {collectResult.error ? collectResult.error : collectResult.results ? (
+          {collectResult.error ? collectResult.error : collectResult.details ? (
+            <div>
+              <p className="font-semibold">Intl Collection: {collectResult.collected} ✓ / {collectResult.failed} ✗</p>
+              {collectResult.details.map((d: string, i: number) => <p key={i}>{d}</p>)}
+            </div>
+          ) : collectResult.results ? (
             <div>
               <p className="font-semibold">Collection complete</p>
               {collectResult.results.map((r: any, i: number) => (
