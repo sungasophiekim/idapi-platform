@@ -34,6 +34,8 @@ export async function POST(req: NextRequest) {
     for (const target of KOREAN_LAW_TARGETS) {
       const result = await collectLaw(target);
       results.push(result);
+      // Delay 2 seconds between requests to avoid rate limiting
+      await new Promise(r => setTimeout(r, 2000));
     }
     return NextResponse.json({ results });
   }

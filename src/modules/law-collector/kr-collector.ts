@@ -39,26 +39,45 @@ const API_KEY = process.env.LAW_GO_KR_API_KEY || 'chetera';
 const SEARCH_ENDPOINT = 'https://www.law.go.kr/DRF/lawSearch.do';
 const DETAIL_ENDPOINT = 'https://www.law.go.kr/DRF/lawService.do';
 
-// Helper: fetch with User-Agent + timeout (Vercel serverless friendly)
-async function safeFetch(url: string, timeoutMs = 25000): Promise<string> {
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), timeoutMs);
-  try {
-    const res = await fetch(url, {
-      signal: controller.signal,
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (compatible; IDAPI-Bot/1.0; +https://idapi-platform.vercel.app)',
-        'Accept': 'application/xml, text/xml, */*',
-        'Accept-Language': 'ko-KR,ko;q=0.9,en;q=0.8',
-      },
-    });
-    if (!res.ok) {
-      throw new Error(`HTTP ${res.status} ${res.statusText}`);
+// Helper: fetch with retry, User-Agent, and timeout
+async function safeFetch(url: string, timeoutMs = 20000, retries = 3): Promise<string> {
+  let lastError: Error | null = null;
+
+  for (let attempt = 1; attempt <= retries; attempt++) {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), timeoutMs);
+
+    try {
+      const res = await fetch(url, {
+        signal: controller.signal,
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+          'Accept-Language': 'ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7',
+          'Connection': 'close',
+        },
+        // @ts-ignore - keepalive disabled for serverless
+        keepalive: false,
+      });
+
+      if (!res.ok) {
+        throw new Error(`HTTP ${res.status} ${res.statusText}`);
+      }
+      clearTimeout(timer);
+      return await res.text();
+    } catch (e: any) {
+      clearTimeout(timer);
+      lastError = e;
+      console.error(`[safeFetch] Attempt ${attempt}/${retries} failed: ${e.message}`);
+
+      if (attempt < retries) {
+        // Exponential backoff: 1s, 2s, 4s
+        await new Promise(r => setTimeout(r, 1000 * Math.pow(2, attempt - 1)));
+      }
     }
-    return await res.text();
-  } finally {
-    clearTimeout(timer);
   }
+
+  throw new Error(`All ${retries} retries failed: ${lastError?.message || 'unknown error'}`);
 }
 
 // ─── XML Helpers (regex-based, no external library) ──────────────────────────
