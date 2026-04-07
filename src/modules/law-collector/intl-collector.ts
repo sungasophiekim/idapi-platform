@@ -503,35 +503,59 @@ export async function fetchEURegulation(
     }
     title = title.replace(/\s+/g, ' ').trim() || `EU Document ${celexNumber}`;
 
-    // Try to extract from eli-container (main content area)
-    const eliMatch = html.match(/<div[^>]*class="[^"]*eli-container[^"]*"[^>]*>([\s\S]*?)<\/div>\s*(?:<\/div>|$)/i);
-    const contentArea = eliMatch?.[1] || html;
-
-    // Parse articles — EU regulations use "Article N" pattern
+    // Parse articles — EUR-Lex uses oj-ti-art class for article markers
+    // Each "Article N" is in <p class="oj-ti-art">Article N</p>
+    // followed by a title in <p class="oj-sti-art">Title</p>
+    // followed by paragraphs <p class="oj-normal">content</p>
     const articles: CollectedArticle[] = [];
-    const articleRegex =
-      /(?:<[^>]*>)*\s*Article\s+(\d+[a-z]?)\s*(?:<[^>]*>)*\s*(?:[\n\r]*([^<\n]{0,300}?))?(?:<[^>]*>)*([\s\S]*?)(?=(?:<[^>]*>)*\s*Article\s+\d|<div[^>]*class="[^"]*(?:final|signature)[^"]*"|$)/gi;
-    let match: RegExpExecArray | null;
-    let sortOrder = 0;
 
-    while ((match = articleRegex.exec(contentArea)) !== null) {
-      const articleNum = `Article ${match[1]}`;
-      const rawTitle = match[2]?.trim();
-      const articleTitle = rawTitle && rawTitle.length > 2 ? stripHtml(rawTitle) : undefined;
-      const content = stripHtml(match[3]).trim();
+    // Find all oj-ti-art positions
+    const artMarkers: { num: string; pos: number }[] = [];
+    const artRegex = /class="oj-ti-art"[^>]*>([^<]*Article\s+\d+[a-z]?)<\/p>/gi;
+    let artMatch: RegExpExecArray | null;
+    while ((artMatch = artRegex.exec(html)) !== null) {
+      const numMatch = artMatch[1].match(/Article\s+(\d+[a-z]?)/i);
+      if (numMatch) {
+        artMarkers.push({ num: numMatch[1], pos: artMatch.index });
+      }
+    }
+    console.log(`[intl-collector] EUR-Lex found ${artMarkers.length} article markers for ${celexNumber}`);
+
+    // Extract content between consecutive markers
+    for (let i = 0; i < artMarkers.length; i++) {
+      const start = artMarkers[i].pos;
+      const end = i + 1 < artMarkers.length ? artMarkers[i + 1].pos : html.length;
+      const block = html.slice(start, end);
+
+      // Article title from first oj-sti-art
+      const stiMatch = block.match(/class="oj-sti-art"[^>]*>([^<]+)<\/p>/i);
+      const articleTitle = stiMatch ? stripHtml(stiMatch[1]).trim() : undefined;
+
+      // Content from all oj-normal paragraphs
+      const normalRegex = /class="oj-normal"[^>]*>([\s\S]*?)<\/p>/gi;
+      const paragraphs: string[] = [];
+      let normMatch: RegExpExecArray | null;
+      while ((normMatch = normalRegex.exec(block)) !== null) {
+        const text = stripHtml(normMatch[1]).trim();
+        if (text) paragraphs.push(text);
+      }
+
+      const content = paragraphs.join('\n\n').trim();
       if (!content || content.length < 5) continue;
 
       articles.push({
-        articleNum,
+        articleNum: `Article ${artMarkers[i].num}`,
         articleTitle,
         content,
         contentEn: content,
-        sortOrder,
+        sortOrder: i,
         tags: extractTags(content),
         appliesToBiz: extractBizTypes(content),
       });
-      sortOrder++;
     }
+
+    // Define contentArea for fallback (for old fallback code below)
+    const contentArea = html;
 
     // Fallback: try to extract Recitals and main body as chunks
     if (articles.length === 0) {
