@@ -351,12 +351,23 @@ export async function saveKoreanLawToArchive(
   const enactedDate = law.enactedDate ? parseKrDate(law.enactedDate) : null;
   const effectiveDate = law.effectiveDate ? parseKrDate(law.effectiveDate) : null;
 
+  // Use unique lawNumber prefixed with KR-LAWGOKR to avoid collision with seed data
+  const uniqueLawNumber = `KR-LAWGOKR-${law.lawNumber || law.title.slice(0, 20)}`;
+
+  // Delete any existing law with same uniqueLawNumber AND its articles (to allow re-collection)
+  const existing = await prisma.lawArchive.findUnique({
+    where: { jurisdiction_lawNumber: { jurisdiction: 'KR', lawNumber: uniqueLawNumber } },
+  });
+  if (existing) {
+    await prisma.lawArticle.deleteMany({ where: { lawId: existing.id } });
+  }
+
   // Upsert the law record
   const upserted = await prisma.lawArchive.upsert({
     where: {
       jurisdiction_lawNumber: {
         jurisdiction: 'KR',
-        lawNumber: law.lawNumber,
+        lawNumber: uniqueLawNumber,
       },
     },
     update: {
@@ -376,7 +387,7 @@ export async function saveKoreanLawToArchive(
       lawType,
       title: law.title,
       shortName: options?.shortName ?? null,
-      lawNumber: law.lawNumber,
+      lawNumber: uniqueLawNumber,
       enactedDate,
       effectiveDate,
       status: 'enacted',

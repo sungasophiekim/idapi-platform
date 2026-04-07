@@ -30,8 +30,13 @@ export interface CollectionResult {
 export async function collectLaw(target: CollectionTarget): Promise<CollectionResult> {
   try {
     if (target.jurisdiction === 'KR') {
-      const result = await collectKoreanLaw(target.lawName, target.options);
-      return { ...result, jurisdiction: 'KR' };
+      try {
+        const result = await collectKoreanLaw(target.lawName, target.options);
+        return { ...result, jurisdiction: 'KR' };
+      } catch (e: any) {
+        console.error(`[collector] KR error for "${target.lawName}":`, e.message, e.stack);
+        return { success: false, title: target.lawName, jurisdiction: 'KR', articleCount: 0, error: e.message };
+      }
     }
 
     // For other jurisdictions with URL
