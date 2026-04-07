@@ -461,41 +461,52 @@ export async function fetchUSBill(
 export async function fetchEURegulation(
   celexNumber: string,
 ): Promise<CollectedLaw | null> {
-  // EUR-Lex HTML endpoint
-  const url = `https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:${celexNumber}&qid=${Date.now()}`;
   const sourceUrl = `https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:${celexNumber}`;
 
   console.log(`[intl-collector] Fetching EUR-Lex CELEX ${celexNumber}...`);
 
-  // Browser-like headers + retry on empty response (EUR-Lex sometimes returns 202 with empty body)
-  let html = '';
-  for (let attempt = 1; attempt <= 4; attempt++) {
-    try {
-      html = await fetchWithTimeout(url, {
-        headers: {
-          'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
-          'Accept-Language': 'en-US,en;q=0.9',
-          'Accept-Encoding': 'gzip, deflate, br',
-          'Cache-Control': 'no-cache',
-          'Pragma': 'no-cache',
-          'Sec-Fetch-Dest': 'document',
-          'Sec-Fetch-Mode': 'navigate',
-          'Sec-Fetch-Site': 'none',
-        },
-      });
+  // Try multiple URL formats — Vercel CDN sometimes blocks the standard HTML endpoint
+  const urlFormats = [
+    `https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:${celexNumber}&from=EN`,
+    `https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:${celexNumber}`,
+    `https://publications.europa.eu/resource/celex/${celexNumber}/EN/HTML`,
+    `https://eur-lex.europa.eu/eli/reg/${celexNumber.match(/3(\d{4})R(\d+)/)?.[1] || ''}/${parseInt(celexNumber.match(/3\d{4}R(\d+)/)?.[1] || '0', 10)}/oj`,
+  ];
 
-      if (html.length > 1000) break; // Got real content
-      console.log(`[intl-collector] EUR-Lex attempt ${attempt}: empty response (${html.length} bytes), retrying...`);
-      await new Promise(r => setTimeout(r, 2000 * attempt));
-    } catch (e: any) {
-      console.log(`[intl-collector] EUR-Lex attempt ${attempt} failed: ${e.message}`);
-      await new Promise(r => setTimeout(r, 2000 * attempt));
+  const browserHeaders = {
+    'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+    'Accept-Language': 'en-US,en;q=0.9',
+    'Cache-Control': 'no-cache',
+    'Sec-Fetch-Dest': 'document',
+    'Sec-Fetch-Mode': 'navigate',
+    'Sec-Fetch-Site': 'none',
+    'Sec-Fetch-User': '?1',
+    'Upgrade-Insecure-Requests': '1',
+  };
+
+  let html = '';
+  for (const url of urlFormats) {
+    if (!url) continue;
+    for (let attempt = 1; attempt <= 3; attempt++) {
+      try {
+        html = await fetchWithTimeout(url, { headers: browserHeaders });
+        if (html.length > 5000 && (html.includes('Article') || html.includes('article'))) {
+          console.log(`[intl-collector] EUR-Lex got ${html.length} bytes from ${url.slice(0, 70)}`);
+          break;
+        }
+        console.log(`[intl-collector] EUR-Lex attempt ${attempt}: ${html.length} bytes (no Article), retry`);
+        await new Promise(r => setTimeout(r, 1500 * attempt));
+      } catch (e: any) {
+        console.log(`[intl-collector] EUR-Lex error: ${e.message}`);
+        await new Promise(r => setTimeout(r, 1500));
+      }
     }
+    if (html.length > 5000 && html.includes('Article')) break;
   }
 
-  if (html.length < 1000) {
-    console.error(`[intl-collector] EUR-Lex returned empty body after 4 attempts for ${celexNumber}`);
+  if (html.length < 5000 || !html.includes('Article')) {
+    console.error(`[intl-collector] EUR-Lex unreachable for ${celexNumber}`);
     return null;
   }
 
