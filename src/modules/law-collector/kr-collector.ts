@@ -61,7 +61,8 @@ function xmlTagAll(xml: string, tag: string): string[] {
 
 /** Extract all blocks matching an outer tag (returns raw XML of each block) */
 function xmlBlocks(xml: string, tag: string): string[] {
-  const re = new RegExp(`<${tag}>[\\s\\S]*?</${tag}>`, 'g');
+  // Match both <tag> and <tag attr="..."> opening tags
+  const re = new RegExp(`<${tag}(?:\\s[^>]*)?>[\\s\\S]*?</${tag}>`, 'g');
   return xml.match(re) || [];
 }
 
@@ -98,26 +99,20 @@ export async function searchKoreanLaw(query: string): Promise<SearchResult[]> {
   }
 
   const xml = await res.text();
-  const lawBlocks = xmlBlocks(xml, '법령');
+
+  // Real law.go.kr API returns <law id="N">...</law> blocks
+  const lawBlocks = xmlBlocks(xml, 'law');
 
   if (lawBlocks.length === 0) {
-    // Try alternate element name used by some API versions
-    const altBlocks = xmlBlocks(xml, 'law');
-    if (altBlocks.length === 0) {
-      console.log('[kr-collector] No results found');
-      return [];
-    }
-    return altBlocks.map((block) => ({
-      id: xmlTag(block, '법령일련번호') || xmlTag(block, '법령ID') || xmlTag(block, 'lawId') || '',
-      name: decodeXmlEntities(xmlTag(block, '법령명한글') || xmlTag(block, '법령명') || ''),
-      lawNumber: decodeXmlEntities(xmlTag(block, '공포번호') || xmlTag(block, '법령번호') || ''),
-    }));
+    console.log('[kr-collector] No results found');
+    console.log('[kr-collector] Response preview:', xml.slice(0, 300));
+    return [];
   }
 
   const results: SearchResult[] = lawBlocks.map((block) => ({
-    id: xmlTag(block, '법령ID') || xmlTag(block, '법령MST') || xmlTag(block, 'ID') || '',
-    name: decodeXmlEntities(xmlTag(block, '법령명') || xmlTag(block, '법령명한글') || ''),
-    lawNumber: decodeXmlEntities(xmlTag(block, '법령번호') || ''),
+    id: xmlTag(block, '법령일련번호') || xmlTag(block, '법령ID') || '',
+    name: decodeXmlEntities(xmlTag(block, '법령명한글') || xmlTag(block, '법령명') || ''),
+    lawNumber: decodeXmlEntities(xmlTag(block, '공포번호') || xmlTag(block, '법령번호') || ''),
   }));
 
   console.log(`[kr-collector] Found ${results.length} result(s)`);
