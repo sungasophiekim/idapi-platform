@@ -1,6 +1,9 @@
 // src/app/api/archive/collect/route.ts
 // POST: Trigger law collection from official sources
 
+export const maxDuration = 60; // Vercel: extend timeout to 60s for collection
+export const dynamic = 'force-dynamic';
+
 import { NextRequest, NextResponse } from 'next/server';
 import { getAuthUser, requireRole } from '@/lib/auth';
 import { UserRole } from '@prisma/client';

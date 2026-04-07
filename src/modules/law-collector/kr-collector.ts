@@ -39,6 +39,28 @@ const API_KEY = process.env.LAW_GO_KR_API_KEY || 'chetera';
 const SEARCH_ENDPOINT = 'https://www.law.go.kr/DRF/lawSearch.do';
 const DETAIL_ENDPOINT = 'https://www.law.go.kr/DRF/lawService.do';
 
+// Helper: fetch with User-Agent + timeout (Vercel serverless friendly)
+async function safeFetch(url: string, timeoutMs = 25000): Promise<string> {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const res = await fetch(url, {
+      signal: controller.signal,
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (compatible; IDAPI-Bot/1.0; +https://idapi-platform.vercel.app)',
+        'Accept': 'application/xml, text/xml, */*',
+        'Accept-Language': 'ko-KR,ko;q=0.9,en;q=0.8',
+      },
+    });
+    if (!res.ok) {
+      throw new Error(`HTTP ${res.status} ${res.statusText}`);
+    }
+    return await res.text();
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 // ─── XML Helpers (regex-based, no external library) ──────────────────────────
 
 /** Extract text content of the first matching XML tag */
@@ -92,13 +114,13 @@ export async function searchKoreanLaw(query: string): Promise<SearchResult[]> {
 
   console.log(`[kr-collector] Searching for: ${query}`);
 
-  const res = await fetch(url.toString());
-  if (!res.ok) {
-    console.error(`[kr-collector] Search failed: ${res.status} ${res.statusText}`);
-    return [];
+  let xml: string;
+  try {
+    xml = await safeFetch(url.toString());
+  } catch (e: any) {
+    console.error(`[kr-collector] Search fetch error: ${e.message}`);
+    throw new Error(`Search failed: ${e.message}`);
   }
-
-  const xml = await res.text();
 
   // Real law.go.kr API returns <law id="N">...</law> blocks
   const lawBlocks = xmlBlocks(xml, 'law');
@@ -226,13 +248,13 @@ export async function fetchKoreanLawFull(lawId: string): Promise<CollectedLaw | 
 
   console.log(`[kr-collector] Fetching law detail for ID: ${lawId}`);
 
-  const res = await fetch(url.toString());
-  if (!res.ok) {
-    console.error(`[kr-collector] Fetch failed: ${res.status} ${res.statusText}`);
-    return null;
+  let xml: string;
+  try {
+    xml = await safeFetch(url.toString());
+  } catch (e: any) {
+    console.error(`[kr-collector] Detail fetch error: ${e.message}`);
+    throw new Error(`Detail fetch failed: ${e.message}`);
   }
-
-  const xml = await res.text();
 
   // Extract top-level law metadata
   const title = decodeXmlEntities(
