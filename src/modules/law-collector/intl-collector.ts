@@ -241,9 +241,10 @@ export async function fetchUSRegulation(
     const url = `https://www.ecfr.gov/api/versioner/v1/full/${issueDate}/title-${title}.xml?part=${part}`;
     const xml = await fetchWithTimeout(url);
 
-    // Extract part heading
+    // Extract part heading and decode HTML entities (&#x2014; = em-dash, etc.)
     const headMatch = xml.match(/<HEAD>([^<]+)<\/HEAD>/);
-    const partTitle = headMatch?.[1]?.trim() || `Title ${title} Part ${part}`;
+    const rawPartTitle = headMatch?.[1]?.trim() || `Title ${title} Part ${part}`;
+    const partTitle = stripHtml(rawPartTitle).replace(/\s+/g, ' ').trim() || `Title ${title} Part ${part}`;
 
     // Extract sections — eCFR uses <DIV8 N="..." TYPE="SECTION"> elements
     const articles: CollectedArticle[] = [];
@@ -468,16 +469,38 @@ export async function fetchEURegulation(
   try {
     const html = await fetchWithTimeout(url);
 
-    // Extract document title
-    const titleMatch = html.match(/<title[^>]*>([\s\S]*?)<\/title>/i);
-    let title = titleMatch ? stripHtml(titleMatch[1]).trim() : `EU Document ${celexNumber}`;
+    // Extract document title from oj-doc-ti elements (EUR-Lex semantic class)
+    // The first 2-3 oj-doc-ti elements typically contain: "REGULATION...", "of DATE", "on TOPIC..."
+    const ojDocTitles: string[] = [];
+    const ojRegex = /class="oj-doc-ti"[^>]*>([^<]+)</g;
+    let ojMatch: RegExpExecArray | null;
+    while ((ojMatch = ojRegex.exec(html)) !== null) {
+      const text = stripHtml(ojMatch[1]).trim();
+      if (text && !text.startsWith('ANNEX') && !text.includes('Text with EEA')) {
+        ojDocTitles.push(text);
+      }
+      if (ojDocTitles.length >= 3) break;
+    }
 
-    // Clean up EUR-Lex title format (often includes "EUR-Lex - CELEX:... - EN")
-    title = title
-      .replace(/EUR-Lex\s*-\s*/g, '')
-      .replace(/CELEX:\S+\s*-?\s*/g, '')
-      .replace(/\s*-\s*EN\s*$/i, '')
-      .trim() || `EU Document ${celexNumber}`;
+    // Try oj-doc-ti-art for the regulation title (e.g. "REGULATION (EU) 2023/1114")
+    const docTiArtMatch = html.match(/class="oj-doc-ti-art"[^>]*>([^<]+)</);
+    const headerTitle = docTiArtMatch ? stripHtml(docTiArtMatch[1]).trim() : '';
+
+    // Build full title
+    let title = '';
+    if (headerTitle) {
+      title = headerTitle;
+      // Add the "on TOPIC" part (usually the 2nd oj-doc-ti)
+      const topicPart = ojDocTitles.find(t => t.startsWith('on '));
+      if (topicPart) title += ' ' + topicPart;
+    } else if (ojDocTitles.length > 0) {
+      title = ojDocTitles.join(' ');
+    } else {
+      // Last resort: <title> tag
+      const titleMatch = html.match(/<title[^>]*>([\s\S]*?)<\/title>/i);
+      title = titleMatch ? stripHtml(titleMatch[1]).trim() : `EU Document ${celexNumber}`;
+    }
+    title = title.replace(/\s+/g, ' ').trim() || `EU Document ${celexNumber}`;
 
     // Try to extract from eli-container (main content area)
     const eliMatch = html.match(/<div[^>]*class="[^"]*eli-container[^"]*"[^>]*>([\s\S]*?)<\/div>\s*(?:<\/div>|$)/i);
