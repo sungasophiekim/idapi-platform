@@ -168,44 +168,55 @@ export async function searchKoreanLaw(query: string): Promise<SearchResult[]> {
  */
 function parseArticlesFromXml(xml: string): CollectedLaw['articles'] {
   const articles: CollectedLaw['articles'] = [];
-
-  // Track current chapter context (편/장/절)
   let currentChapter = '';
 
-  // Extract 편 (part), 장 (chapter), 절 (section) markers that appear before articles
-  // These are typically in the structure as siblings to 조문 elements
+  // Real law.go.kr API structure: <조문> contains many <조문단위> elements
+  // Each <조문단위> = one article
+  const articleBlocks = xmlBlocks(xml, '조문단위');
+  console.log(`[kr-collector] Found ${articleBlocks.length} 조문단위 blocks`);
 
-  const articleBlocks = xmlBlocks(xml, '조문');
+  if (articleBlocks.length > 0) {
+    articleBlocks.forEach((block, idx) => {
+      const articleNum = decodeXmlEntities(xmlTag(block, '조문번호'));
+      const articleTitle = decodeXmlEntities(xmlTag(block, '조문제목'));
+      const articleType = xmlTag(block, '조문여부'); // "조문" or "전문"
+      const content = decodeXmlEntities(xmlTag(block, '조문내용'));
 
-  if (articleBlocks.length === 0) {
-    console.log('[kr-collector] No 조문 elements found, trying alternate structures...');
+      // Skip "전문" (preamble) sections that aren't real articles
+      if (articleType === '전문') return;
 
-    // Try 조문단위 as alternate element name
-    const altBlocks = xmlBlocks(xml, '조문단위');
-    if (altBlocks.length > 0) {
-      altBlocks.forEach((block, idx) => {
-        const articleNum = decodeXmlEntities(xmlTag(block, '조문번호') || xmlTag(block, '조문키'));
-        const articleTitle = decodeXmlEntities(xmlTag(block, '조문제목'));
-        const content = decodeXmlEntities(
-          xmlTag(block, '조문내용') || xmlTag(block, '조문')
-        );
-
-        if (articleNum || content) {
-          const num = articleNum.match(/\d+/) ? `제${articleNum}조` : articleNum;
-          articles.push({
-            articleNum: num || `제${idx + 1}조`,
-            articleTitle: articleTitle || undefined,
-            content: content.replace(/^제\d+조(\([^)]*\))?\s*/, '').trim() || content,
-            chapter: currentChapter || undefined,
-            sortOrder: idx + 1,
-          });
+      if (articleNum || content) {
+        // Extract paragraph (항) numbers if needed
+        const paragraphs = xmlBlocks(block, '항');
+        let extraContent = '';
+        if (paragraphs.length > 0) {
+          extraContent = '\n' + paragraphs
+            .map(p => {
+              const num = decodeXmlEntities(xmlTag(p, '항번호') || '');
+              const text = decodeXmlEntities(xmlTag(p, '항내용') || '');
+              return `${num} ${text}`.trim();
+            })
+            .filter(Boolean)
+            .join('\n');
         }
-      });
-      return articles;
-    }
+
+        articles.push({
+          articleNum: articleNum ? `제${articleNum}조` : `제${idx + 1}조`,
+          articleTitle: articleTitle || undefined,
+          content: (content + extraContent).trim() || '(내용 없음)',
+          chapter: currentChapter || undefined,
+          sortOrder: idx + 1,
+        });
+      }
+    });
+
+    console.log(`[kr-collector] Parsed ${articles.length} articles from 조문단위`);
+    return articles;
   }
 
-  articleBlocks.forEach((block, idx) => {
+  // Legacy fallback: parse from raw 조문 blocks (for older API formats)
+  const legacyBlocks = xmlBlocks(xml, '조문');
+  legacyBlocks.forEach((block, idx) => {
     const articleNum = decodeXmlEntities(xmlTag(block, '조문번호'));
     const articleTitle = decodeXmlEntities(xmlTag(block, '조문제목'));
     const rawContent = decodeXmlEntities(xmlTag(block, '조문내용'));
