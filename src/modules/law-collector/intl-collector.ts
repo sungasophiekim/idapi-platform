@@ -227,13 +227,18 @@ export async function fetchUSRegulation(
   title: number,
   part: number,
 ): Promise<CollectedLaw | null> {
-  const today = new Date().toISOString().split('T')[0];
-  const url = `https://www.ecfr.gov/api/versioner/v1/full/${today}/title-${title}.xml?part=${part}`;
   const sourceUrl = `https://www.ecfr.gov/current/title-${title}/part-${part}`;
 
   console.log(`[intl-collector] Fetching eCFR Title ${title} Part ${part}...`);
 
   try {
+    // Get the latest issue date for this title (eCFR API requires a specific past date)
+    const titlesRes = await fetchWithTimeout('https://www.ecfr.gov/api/versioner/v1/titles');
+    const titlesData = JSON.parse(titlesRes);
+    const titleInfo = titlesData.titles?.find((t: any) => t.number === title);
+    const issueDate = titleInfo?.latest_issue_date || new Date(Date.now() - 30 * 86400000).toISOString().split('T')[0];
+
+    const url = `https://www.ecfr.gov/api/versioner/v1/full/${issueDate}/title-${title}.xml?part=${part}`;
     const xml = await fetchWithTimeout(url);
 
     // Extract part heading
