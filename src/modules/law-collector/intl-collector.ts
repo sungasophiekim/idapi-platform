@@ -46,7 +46,7 @@ interface FetchAndParseConfig {
 
 const FETCH_TIMEOUT = 30_000;
 const CONGRESS_API_KEY = process.env.CONGRESS_API_KEY || '';
-const USER_AGENT = 'idapi-platform/1.0 (law-collector)';
+const USER_AGENT = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36';
 
 // ─── Helpers ───
 
@@ -462,13 +462,44 @@ export async function fetchEURegulation(
   celexNumber: string,
 ): Promise<CollectedLaw | null> {
   // EUR-Lex HTML endpoint
-  const url = `https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:${celexNumber}`;
+  const url = `https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:${celexNumber}&qid=${Date.now()}`;
   const sourceUrl = `https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:${celexNumber}`;
 
   console.log(`[intl-collector] Fetching EUR-Lex CELEX ${celexNumber}...`);
 
+  // Browser-like headers + retry on empty response (EUR-Lex sometimes returns 202 with empty body)
+  let html = '';
+  for (let attempt = 1; attempt <= 4; attempt++) {
+    try {
+      html = await fetchWithTimeout(url, {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
+          'Accept-Language': 'en-US,en;q=0.9',
+          'Accept-Encoding': 'gzip, deflate, br',
+          'Cache-Control': 'no-cache',
+          'Pragma': 'no-cache',
+          'Sec-Fetch-Dest': 'document',
+          'Sec-Fetch-Mode': 'navigate',
+          'Sec-Fetch-Site': 'none',
+        },
+      });
+
+      if (html.length > 1000) break; // Got real content
+      console.log(`[intl-collector] EUR-Lex attempt ${attempt}: empty response (${html.length} bytes), retrying...`);
+      await new Promise(r => setTimeout(r, 2000 * attempt));
+    } catch (e: any) {
+      console.log(`[intl-collector] EUR-Lex attempt ${attempt} failed: ${e.message}`);
+      await new Promise(r => setTimeout(r, 2000 * attempt));
+    }
+  }
+
+  if (html.length < 1000) {
+    console.error(`[intl-collector] EUR-Lex returned empty body after 4 attempts for ${celexNumber}`);
+    return null;
+  }
+
   try {
-    const html = await fetchWithTimeout(url);
 
     // Extract document title from oj-doc-ti elements (EUR-Lex semantic class)
     // The first 2-3 oj-doc-ti elements typically contain: "REGULATION...", "of DATE", "on TOPIC..."
@@ -852,15 +883,19 @@ export async function saveLawToArchive(
 // Batch collection — commonly tracked international laws
 // ═══════════════════════════════════════════════════════════════
 
-/** Collect well-known crypto/digital asset regulations */
-export async function collectKnownInternationalLaws(): Promise<{
+/** Collect well-known crypto/digital asset regulations
+ * @param onlyMissing - If true, skip laws that already have >5 articles in the DB
+ */
+export async function collectKnownInternationalLaws(onlyMissing = false): Promise<{
   collected: number;
   failed: number;
+  skipped: number;
   details: string[];
 }> {
   const details: string[] = [];
   let collected = 0;
   let failed = 0;
+  let skipped = 0;
 
   const tasks: Array<{ name: string; fn: () => Promise<CollectedLaw | null> }> = [
     // ═══ US — FinCEN BSA Regulations (Title 31) ═══
@@ -911,7 +946,42 @@ export async function collectKnownInternationalLaws(): Promise<{
     { name: 'SG Payment Services Act', fn: () => fetchSingaporeLaw('PSA2019') },
   ];
 
+  // If onlyMissing, build a map of existing laws (by lawNumber) with article counts
+  let existingMap = new Map<string, number>();
+  if (onlyMissing) {
+    const existing = await prisma.lawArchive.findMany({
+      where: { jurisdiction: { in: ['US', 'EU', 'SG'] } },
+      select: { lawNumber: true, _count: { select: { articles: true } } },
+    });
+    for (const e of existing) {
+      existingMap.set(e.lawNumber, e._count.articles);
+    }
+  }
+
+  // Helper: derive expected lawNumber for skip check
+  const getLawNumberForTask = (taskName: string): string | null => {
+    const cfrMatch = taskName.match(/(\d+)\s*CFR\s*(\d+)/);
+    if (cfrMatch) return `CFR-T${cfrMatch[1]}-P${cfrMatch[2]}`;
+    const celexMatch = taskName.match(/\((\d{4}\/\d+)\)/);
+    if (celexMatch) {
+      const [year, num] = celexMatch[1].split('/');
+      // Try both R (regulation) and L (directive) prefixes
+      return `CELEX-3${year}R${num.padStart(4, '0')}`;
+    }
+    return null;
+  };
+
   for (const task of tasks) {
+    // Skip if already collected (only when onlyMissing=true)
+    if (onlyMissing) {
+      const expectedLn = getLawNumberForTask(task.name);
+      if (expectedLn && (existingMap.get(expectedLn) || 0) > 5) {
+        details.push(`[SKIP] ${task.name}: already has ${existingMap.get(expectedLn)} articles`);
+        skipped++;
+        continue;
+      }
+    }
+
     try {
       // Small delay to avoid rate limiting
       await new Promise(r => setTimeout(r, 500));
@@ -935,6 +1005,6 @@ export async function collectKnownInternationalLaws(): Promise<{
     }
   }
 
-  console.log(`[intl-collector] Batch complete: ${collected} collected, ${failed} failed`);
-  return { collected, failed, details };
+  console.log(`[intl-collector] Batch complete: ${collected} collected, ${skipped} skipped, ${failed} failed`);
+  return { collected, failed, skipped, details };
 }

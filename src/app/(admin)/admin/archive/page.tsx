@@ -42,12 +42,12 @@ export default function AdminArchivePage() {
   const [collectResult, setCollectResult] = useState<any>(null);
   const [collectForm, setCollectForm] = useState({ jurisdiction: 'KR', lawName: '', shortName: '', regulator: '' });
 
-  const runCollect = async (preset?: string, intl?: boolean) => {
+  const runCollect = async (preset?: string, intl?: boolean, onlyMissing?: boolean) => {
     setCollecting(true);
     setCollectResult(null);
     try {
       const url = intl ? '/api/archive/collect-intl' : '/api/archive/collect';
-      const body = intl ? {} : preset ? { preset } : { ...collectForm };
+      const body = intl ? { onlyMissing: !!onlyMissing } : preset ? { preset } : { ...collectForm };
       const res = await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -108,6 +108,9 @@ export default function AdminArchivePage() {
           <Btn onClick={() => runCollect(undefined, true)} disabled={collecting} size="sm" variant="outline">
             <Icon name="globe" size={14} /> Collect Intl
           </Btn>
+          <Btn onClick={() => runCollect(undefined, true, true)} disabled={collecting} size="sm" variant="ghost">
+            <Icon name="search" size={14} /> Retry Missing
+          </Btn>
         </div>
       </div>
 
@@ -116,7 +119,7 @@ export default function AdminArchivePage() {
         <div className={`mb-4 p-4 rounded-xl border text-sm ${collectResult.error ? 'bg-red-50 border-red-200 text-red-700' : 'bg-green-50 border-green-200 text-green-800'}`}>
           {collectResult.error ? collectResult.error : collectResult.details ? (
             <div>
-              <p className="font-semibold">Intl Collection: {collectResult.collected} ✓ / {collectResult.failed} ✗</p>
+              <p className="font-semibold">Intl Collection: {collectResult.collected} ✓ / {collectResult.failed} ✗ {collectResult.skipped > 0 && `/ ${collectResult.skipped} ⏭`}</p>
               {collectResult.details.map((d: string, i: number) => <p key={i}>{d}</p>)}
             </div>
           ) : collectResult.results ? (
