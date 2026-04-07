@@ -14,12 +14,12 @@ interface JpCollectedLaw {
 }
 
 export const JAPANESE_LAW_TARGETS: { name: string; nameEn: string; lawId: string; shortName?: string; regulator?: string }[] = [
-  { name: '金融商品取引法', nameEn: 'Financial Instruments and Exchange Act', lawId: '329AC0000000025', shortName: 'FIEA', regulator: 'FSA Japan' },
+  { name: '金融商品取引法', nameEn: 'Financial Instruments and Exchange Act', lawId: '323AC0000000025', shortName: 'FIEA', regulator: 'FSA Japan' },
   { name: '資金決済に関する法律', nameEn: 'Payment Services Act', lawId: '421AC0000000059', shortName: 'PSA', regulator: 'FSA Japan' },
   { name: '犯罪による収益の移転防止に関する法律', nameEn: 'Act on Prevention of Transfer of Criminal Proceeds', lawId: '419AC0000000022', shortName: 'APTCP', regulator: 'NPA / FSA Japan' },
-  { name: '電子記録債権法', nameEn: 'Electronically Recorded Monetary Claims Act', lawId: '423AC0000000053', shortName: 'ERMCA', regulator: 'FSA Japan' },
-  { name: '銀行法', nameEn: 'Banking Act', lawId: '335AC0000000048', shortName: 'Banking Act', regulator: 'FSA Japan' },
-  { name: '信託業法', nameEn: 'Trust Business Act', lawId: '322AC0000000025', shortName: 'Trust Business Act', regulator: 'FSA Japan' },
+  { name: '電子記録債権法', nameEn: 'Electronically Recorded Monetary Claims Act', lawId: '419AC0000000102', shortName: 'ERMCA', regulator: 'FSA Japan' },
+  { name: '銀行法', nameEn: 'Banking Act', lawId: '356AC0000000059', shortName: 'Banking Act', regulator: 'FSA Japan' },
+  { name: '信託業法', nameEn: 'Trust Business Act', lawId: '416AC0000000154', shortName: 'Trust Business Act', regulator: 'FSA Japan' },
 ];
 
 const EGOV_BASE = 'https://elaws.e-gov.go.jp/api/1/lawdata';
