@@ -42,12 +42,16 @@ export default function AdminArchivePage() {
   const [collectResult, setCollectResult] = useState<any>(null);
   const [collectForm, setCollectForm] = useState({ jurisdiction: 'KR', lawName: '', shortName: '', regulator: '' });
 
-  const runCollect = async (preset?: string, intl?: boolean, onlyMissing?: boolean) => {
+  const runCollect = async (preset?: string, mode?: 'intl' | 'asia' | 'kr', onlyMissing?: boolean) => {
     setCollecting(true);
     setCollectResult(null);
     try {
-      const url = intl ? '/api/archive/collect-intl' : '/api/archive/collect';
-      const body = intl ? { onlyMissing: !!onlyMissing } : preset ? { preset } : { ...collectForm };
+      const url = mode === 'asia' ? '/api/archive/collect-asia'
+                : mode === 'intl' ? '/api/archive/collect-intl'
+                : '/api/archive/collect';
+      const body = mode === 'asia' ? {}
+                 : mode === 'intl' ? { onlyMissing: !!onlyMissing }
+                 : preset ? { preset } : { ...collectForm };
       const res = await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -102,13 +106,16 @@ export default function AdminArchivePage() {
           <p className="text-sm text-gray-400 mt-1">조문 단위 법률 아카이브 — AI 컨텍스트 소스</p>
         </div>
         <div className="flex gap-2">
-          <Btn onClick={() => runCollect('korean-all')} disabled={collecting} size="sm">
+          <Btn onClick={() => runCollect('korean-all', 'kr')} disabled={collecting} size="sm">
             {collecting ? <><span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> ...</> : <><Icon name="search" size={14} /> Collect KR</>}
           </Btn>
-          <Btn onClick={() => runCollect(undefined, true)} disabled={collecting} size="sm" variant="outline">
+          <Btn onClick={() => runCollect(undefined, 'intl')} disabled={collecting} size="sm" variant="outline">
             <Icon name="globe" size={14} /> Collect Intl
           </Btn>
-          <Btn onClick={() => runCollect(undefined, true, true)} disabled={collecting} size="sm" variant="ghost">
+          <Btn onClick={() => runCollect(undefined, 'asia')} disabled={collecting} size="sm" variant="outline">
+            <Icon name="globe" size={14} /> Collect JP+HK
+          </Btn>
+          <Btn onClick={() => runCollect(undefined, 'intl', true)} disabled={collecting} size="sm" variant="ghost">
             <Icon name="search" size={14} /> Retry Missing
           </Btn>
         </div>

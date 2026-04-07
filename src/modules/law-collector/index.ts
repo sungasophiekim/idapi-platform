@@ -3,7 +3,11 @@
 
 import { collectKoreanLaw } from './kr-collector';
 import { saveLawToArchive, fetchAndParseLawFromUrl } from './intl-collector';
+import { collectJapaneseLaw, JAPANESE_LAW_TARGETS } from './jp-collector';
+import { collectHongKongLaw, HONG_KONG_LAW_TARGETS } from './hk-collector';
 import { getArchiveStats } from '../law-archive';
+
+export { JAPANESE_LAW_TARGETS, HONG_KONG_LAW_TARGETS };
 
 export interface CollectionTarget {
   jurisdiction: string;
