@@ -554,6 +554,47 @@ export async function fetchEURegulation(
       });
     }
 
+    // Fallback: Try plain-text "Article N" matching if primary parser yields too few
+    if (articles.length <= 1) {
+      console.log(`[intl-collector] EUR-Lex primary parser yielded ${articles.length} articles, trying fallback for ${celexNumber}`);
+      articles.length = 0;
+
+      const plainText = stripHtml(html);
+      const textArtRegex = /\bArticle\s+(\d+[a-z]?)\b/g;
+      const positions: { num: string; pos: number }[] = [];
+      let m: RegExpExecArray | null;
+      while ((m = textArtRegex.exec(plainText)) !== null) {
+        const prevChar = plainText[m.index - 1];
+        if (prevChar && prevChar !== '\n' && prevChar !== ' ') continue;
+        positions.push({ num: m[1], pos: m.index });
+      }
+
+      const seen = new Set<string>();
+      const uniquePositions = positions.filter(p => {
+        if (seen.has(p.num)) return false;
+        seen.add(p.num);
+        return true;
+      });
+
+      console.log(`[intl-collector] Fallback found ${uniquePositions.length} unique article numbers`);
+
+      for (let i = 0; i < uniquePositions.length; i++) {
+        const start = uniquePositions[i].pos;
+        const end = i + 1 < uniquePositions.length ? uniquePositions[i + 1].pos : Math.min(plainText.length, start + 5000);
+        const block = plainText.slice(start, end).trim();
+        if (block.length < 30) continue;
+
+        articles.push({
+          articleNum: `Article ${uniquePositions[i].num}`,
+          content: block,
+          contentEn: block,
+          sortOrder: i,
+          tags: extractTags(block),
+          appliesToBiz: extractBizTypes(block),
+        });
+      }
+    }
+
     // Define contentArea for fallback (for old fallback code below)
     const contentArea = html;
 
