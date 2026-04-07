@@ -240,23 +240,30 @@ export async function fetchUSRegulation(
     const headMatch = xml.match(/<HEAD>([^<]+)<\/HEAD>/);
     const partTitle = headMatch?.[1]?.trim() || `Title ${title} Part ${part}`;
 
-    // Extract sections — eCFR uses <SECTION> elements
+    // Extract sections — eCFR uses <DIV8 N="..." TYPE="SECTION"> elements
     const articles: CollectedArticle[] = [];
-    const sectionRegex = /<SECTION>[\s\S]*?<SECTNO>([^<]+)<\/SECTNO>\s*(?:<SUBJECT>([^<]*)<\/SUBJECT>)?\s*([\s\S]*?)<\/SECTION>/g;
+    const sectionRegex = /<DIV8\s+N="([^"]+)"\s+TYPE="SECTION"[^>]*>([\s\S]*?)<\/DIV8>/g;
     let match: RegExpExecArray | null;
     let sortOrder = 0;
 
     while ((match = sectionRegex.exec(xml)) !== null) {
-      const sectionNum = match[1].trim();      // e.g. "§ 200.2"
-      const sectionTitle = match[2]?.trim();    // e.g. "Definitions"
-      const rawContent = match[3];
+      const sectionNum = match[1].trim();      // e.g. "1010.100"
+      const inner = match[2];
 
-      // Extract paragraph content from within the section
-      const content = stripHtml(rawContent).trim();
+      // Extract HEAD (section title)
+      const headMatch = inner.match(/<HEAD>([\s\S]*?)<\/HEAD>/);
+      const headText = headMatch ? stripHtml(headMatch[1]).trim() : '';
+      // Title is usually like "§ 1010.100 General definitions."
+      const titleMatch = headText.match(/§?\s*[\d.]+\s+(.+?)\.?$/);
+      const sectionTitle = titleMatch ? titleMatch[1].trim() : headText;
+
+      // Strip HEAD from content, then extract everything else
+      const contentXml = inner.replace(/<HEAD>[\s\S]*?<\/HEAD>/, '');
+      const content = stripHtml(contentXml).trim();
       if (!content) continue;
 
       articles.push({
-        articleNum: sectionNum,
+        articleNum: `§ ${sectionNum}`,
         articleTitle: sectionTitle || undefined,
         content,
         contentEn: content, // Already in English
