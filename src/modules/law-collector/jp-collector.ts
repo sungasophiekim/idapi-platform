@@ -167,13 +167,12 @@ export async function saveJapaneseLawToArchive(
     titleEn: law.titleEn,
     shortName: options?.shortName,
     lawNumber,
+    lawType: 'law',
     jurisdiction: 'JP',
-    country: 'Japan',
     regulator: options?.regulator,
-    language: 'ja',
+    status: 'enacted',
+    totalArticles: law.articles.length,
     sourceUrl: `https://elaws.e-gov.go.jp/document?lawid=${law.lawId}`,
-    tags,
-    appliesToBiz,
   };
 
   let lawRecord: any;
@@ -195,6 +194,8 @@ export async function saveJapaneseLawToArchive(
         content: a.content,
         chapter: a.chapter,
         sortOrder: a.sortOrder,
+        tags,
+        appliesToBiz,
       })),
     });
   }
