@@ -3,6 +3,7 @@
 // Input: business profile → Output: compliance requirements + pending bill impact + timeline
 
 import { getLawsForJurisdictions, CURRENT_LAWS, BUSINESS_TYPE_LABELS, type BusinessType, type LawRequirement } from './law-matrix';
+import { buildLawContext } from '../law-archive';
 
 export { BUSINESS_TYPE_LABELS, type BusinessType } from './law-matrix';
 
@@ -65,7 +66,7 @@ function estimateTimeline(status: string): string {
 }
 
 // ─── Build the context for AI analysis ───
-function buildAIContext(profile: BusinessProfile, currentLaws: LawRequirement[], pendingBills: any[]): string {
+async function buildAIContext(profile: BusinessProfile, currentLaws: LawRequirement[], pendingBills: any[], archiveContext?: string): Promise<string> {
   const bizTypes = profile.businessTypes.map(bt => BUSINESS_TYPE_LABELS[bt]?.en || bt).join(', ');
   const jurisdictions = profile.targetJurisdictions.join(', ');
 
@@ -87,11 +88,16 @@ ${reqs}
 }).join('\n\n')}
 
 PENDING LEGISLATION IN PIPELINE:
-${pendingBills.length > 0 ? pendingBills.map(bill => 
+${pendingBills.length > 0 ? pendingBills.map(bill =>
   `[${bill.jurisdiction}] ${bill.titleEn || bill.title}
   Status: ${bill.status} | Impact: ${bill.impactScore || 'N/A'}/10
   Timeline estimate: ${estimateTimeline(bill.status)}`
 ).join('\n') : 'No directly relevant pending legislation found.'}`;
+
+  // Append IDAPI Law Archive context (full-text articles from 5,000+ laws)
+  if (archiveContext && archiveContext.length > 100) {
+    context += `\n\n${archiveContext}`;
+  }
 
   return context;
 }
@@ -181,7 +187,19 @@ async function generateAIAdvisory(
     return fallbackAdvisory(profile, currentLaws, pendingBills);
   }
 
-  const context = buildAIContext(profile, currentLaws, pendingBills);
+  // Fetch IDAPI Law Archive context (full-text articles relevant to business)
+  let archiveContext = '';
+  try {
+    archiveContext = await buildLawContext(
+      profile.targetJurisdictions,
+      profile.businessTypes as string[],
+      profile.tokenType ? profile.tokenType.split(',') : undefined,
+    );
+  } catch (e) {
+    console.error('[RegConsulting] Failed to build archive context:', e);
+  }
+
+  const context = await buildAIContext(profile, currentLaws, pendingBills, archiveContext);
 
   const systemPrompt = `You are IDAPI's regulatory consulting AI — an expert in global digital asset regulation.
 
