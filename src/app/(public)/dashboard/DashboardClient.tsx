@@ -1,7 +1,7 @@
 // src/app/(public)/dashboard/DashboardClient.tsx
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useLang } from '@/lib/i18n';
 import { Icon, Badge } from '@/components/ui';
 
@@ -33,21 +33,62 @@ interface Props {
   trends: any[];
   briefings: any[];
   stats: { total: number; enacted: number; recentlyUpdated: number };
+  archiveData: {
+    totalLaws: number;
+    totalArticles: number;
+    articlesByJurisdiction: Record<string, number>;
+    regulationsByJurisdiction: Record<string, number>;
+  };
 }
 
-export default function DashboardClient({ regulations, trends, briefings, stats }: Props) {
+export default function DashboardClient({ regulations, trends, briefings, stats, archiveData }: Props) {
   const { lang, t, bi } = useLang();
   const [jFilter, setJFilter] = useState('all');
   const [viewMode, setViewMode] = useState<'kanban' | 'list'>('kanban');
   const [selTrend, setSelTrend] = useState<any>(null);
   const [selReg, setSelReg] = useState<any>(null);
   const [selBriefing, setSelBriefing] = useState<any>(null);
+  const [search, setSearch] = useState('');
 
-  const filtered = jFilter === 'all' ? regulations : regulations.filter((r: any) => r.jurisdiction === jFilter);
+  // Filtering: jurisdiction + search
+  const filtered = useMemo(() => {
+    return regulations.filter((r: any) => {
+      if (jFilter !== 'all' && r.jurisdiction !== jFilter) return false;
+      if (search) {
+        const q = search.toLowerCase();
+        const text = `${r.title || ''} ${r.titleEn || ''} ${(r.tags || []).join(' ')}`.toLowerCase();
+        if (!text.includes(q)) return false;
+      }
+      return true;
+    });
+  }, [regulations, jFilter, search]);
+
   const kanbanCols = STATUS_ORDER.map(s => ({ status: s, label: STATUS_LABELS[s], items: filtered.filter((r: any) => r.status === s) }));
   const spikes = trends.filter((tr: any) => tr.score >= 80);
 
-  // ─── Shared sub-components ───
+  // Monthly trend data — group by proposedDate or createdAt
+  const monthlyData = useMemo(() => {
+    const months: Record<string, number> = {};
+    const now = new Date();
+    // Last 12 months
+    for (let i = 11; i >= 0; i--) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+      months[key] = 0;
+    }
+    regulations.forEach((r: any) => {
+      const d = r.proposedDate || r.createdAt;
+      if (!d) return;
+      const date = new Date(d);
+      const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+      if (key in months) months[key]++;
+    });
+    return Object.entries(months).map(([month, count]) => ({ month, count }));
+  }, [regulations]);
+
+  const maxMonth = Math.max(...monthlyData.map(m => m.count), 1);
+
+  // ─── Sub-components ───
   const ImpactBar = ({ score }: { score: number }) => (
     <div className="flex items-center gap-1">
       <div className="flex gap-0.5">{Array.from({ length: 5 }).map((_, i) => (
@@ -68,76 +109,194 @@ export default function DashboardClient({ regulations, trends, briefings, stats 
   return (
     <div className="pt-28 pb-20 max-w-[1280px] mx-auto px-6">
 
-      {/* Header */}
-      <div className="flex items-end justify-between mb-6 flex-wrap gap-4">
-        <div>
-          <div className="text-[11px] font-bold tracking-widest uppercase text-green-deep mb-2">{t('정책 대시보드', 'Policy Dashboard')}</div>
-          <h1 className="text-2xl md:text-[32px] font-bold tracking-tight">{t('글로벌 디지털자산 정책 레이더', 'Global Digital Asset Policy Radar')}</h1>
-        </div>
-        <div className="flex gap-2">
-          {(['kanban', 'list'] as const).map(m => (
-            <button key={m} onClick={() => setViewMode(m)}
-              className={`px-3 py-1.5 rounded-lg text-[13px] font-medium transition-all ${viewMode === m ? 'bg-green-deep text-white' : 'bg-gray-100 text-gray-500'}`}>
-              {m === 'kanban' ? t('칸반', 'Kanban') : t('리스트', 'List')}
-            </button>
-          ))}
+      {/* ═══ HERO ═══ */}
+      <div className="bg-gradient-to-br from-green-deep to-green-deep/80 text-white rounded-2xl p-8 md:p-10 mb-8">
+        <div className="flex items-start justify-between flex-wrap gap-6">
+          <div className="max-w-2xl">
+            <div className="text-[11px] font-bold tracking-widest uppercase text-white/70 mb-3">{t('정책 인텔리전스 대시보드', 'Policy Intelligence Dashboard')}</div>
+            <h1 className="text-3xl md:text-[40px] font-bold tracking-tight leading-tight mb-3">
+              {t('글로벌 디지털자산 정책 레이더', 'Global Digital Asset Policy Radar')}
+            </h1>
+            <p className="text-white/80 text-[15px] leading-relaxed">
+              {t(
+                '6개국 75개 법률, 5,089개 조문, 96개 진행 중 법안을 실시간 추적하고 AI가 분석합니다.',
+                'Real-time tracking of 75 laws, 5,089 articles, and 96 pending bills across 6 jurisdictions, analyzed by AI.'
+              )}
+            </p>
+          </div>
+
+          {/* Big stat badges */}
+          <div className="grid grid-cols-3 gap-3 md:gap-5">
+            {[
+              { v: archiveData.totalArticles.toLocaleString(), l: t('조문', 'Articles') },
+              { v: archiveData.totalLaws, l: t('법률', 'Laws') },
+              { v: stats.total, l: t('법안', 'Bills') },
+            ].map(s => (
+              <div key={s.l} className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl px-4 py-3 text-center min-w-[80px]">
+                <div className="text-2xl md:text-3xl font-bold">{s.v}</div>
+                <div className="text-[10px] uppercase tracking-wider text-white/60 mt-0.5">{s.l}</div>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
 
-      {/* Spike Alert */}
+      {/* ═══ SPIKE ALERT ═══ */}
       {spikes.length > 0 && (
-        <div className="mb-6 bg-red-50 border border-red-200 rounded-xl p-4">
+        <div className="mb-6 bg-gradient-to-r from-red-50 to-orange-50 border border-red-200 rounded-xl p-4">
           <div className="flex items-center gap-2 mb-2">
-            <span className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />
-            <span className="text-[13px] font-semibold text-red-700">{t('급상승 이슈', 'Trending Alert')}</span>
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+            </span>
+            <span className="text-[13px] font-semibold text-red-700">{t('급상승 이슈', 'Trending Now')}</span>
+            <span className="text-[11px] text-red-500">{spikes.length} {t('개', 'topics')}</span>
           </div>
           <div className="flex gap-2 flex-wrap">
             {spikes.map((tr: any) => (
               <button key={tr.id} onClick={() => setSelTrend(tr)}
-                className="px-3 py-1.5 bg-red-100 text-red-700 rounded-full text-[13px] font-medium hover:bg-red-200 transition-colors cursor-pointer">
-                {bi(tr.keyword, tr.keywordEn)} ({Math.round(tr.score)})
+                className="px-3 py-1.5 bg-white/80 text-red-700 border border-red-200 rounded-full text-[13px] font-medium hover:bg-white transition-colors cursor-pointer shadow-sm">
+                🔥 {bi(tr.keyword, tr.keywordEn)} <span className="opacity-60">({Math.round(tr.score)})</span>
               </button>
             ))}
           </div>
         </div>
       )}
 
-      {/* Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-        {[
-          { label: t('추적 중인 법안', 'Tracked'), value: stats.total, color: 'text-green-deep' },
-          { label: t('시행 완료', 'Enacted'), value: stats.enacted, color: 'text-blue-600' },
-          { label: t('이번 주', 'This Week'), value: stats.recentlyUpdated, color: 'text-amber-600' },
-          { label: t('트렌드', 'Trends'), value: trends.length, color: 'text-purple-600' },
-        ].map(s => (
-          <div key={s.label} className="bg-white border border-[#e8e8e6] rounded-xl p-5">
-            <div className="text-[12px] text-gray-400 mb-1">{s.label}</div>
-            <div className={`text-[28px] font-bold ${s.color}`}>{s.value}</div>
+      {/* ═══ ROW: MONTHLY CHART + JURISDICTION COMPARISON ═══ */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+
+        {/* Monthly Trend Chart */}
+        <div className="lg:col-span-2 bg-white border border-[#e8e8e6] rounded-2xl p-6">
+          <div className="flex items-center justify-between mb-5">
+            <div>
+              <h3 className="text-[15px] font-bold">{t('월별 입법 동향 (12개월)', 'Monthly Legislation Activity (12mo)')}</h3>
+              <p className="text-[12px] text-gray-400 mt-0.5">{t('새로 발의·등록된 법안 수', 'Bills proposed/registered per month')}</p>
+            </div>
+            <div className="text-right">
+              <div className="text-[11px] text-gray-400 uppercase tracking-wider">{t('최고치', 'Peak')}</div>
+              <div className="text-[18px] font-bold text-green-deep">{maxMonth}</div>
+            </div>
           </div>
-        ))}
+          <div className="flex items-end gap-1.5 h-32">
+            {monthlyData.map((m, i) => {
+              const h = (m.count / maxMonth) * 100;
+              return (
+                <div key={m.month} className="flex-1 flex flex-col items-center gap-1 group">
+                  <div className="text-[10px] text-gray-400 group-hover:text-green-deep group-hover:font-bold transition-colors min-h-[14px]">{m.count > 0 ? m.count : ''}</div>
+                  <div className="w-full bg-gray-100 rounded-t-sm relative" style={{ height: '100px' }}>
+                    <div
+                      className={`absolute bottom-0 left-0 right-0 rounded-t-sm transition-all ${i === monthlyData.length - 1 ? 'bg-green-deep' : 'bg-green-deep/40 group-hover:bg-green-deep/70'}`}
+                      style={{ height: `${h}%` }}
+                    />
+                  </div>
+                  <div className="text-[9px] text-gray-400">{m.month.slice(5)}</div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Jurisdiction Comparison */}
+        <div className="bg-white border border-[#e8e8e6] rounded-2xl p-6">
+          <h3 className="text-[15px] font-bold mb-1">{t('관할권별 활동량', 'Activity by Jurisdiction')}</h3>
+          <p className="text-[12px] text-gray-400 mb-4">{t('법률 + 진행 중 법안 합계', 'Laws + active bills')}</p>
+          <div className="space-y-3">
+            {Object.entries(JURISDICTIONS).map(([code, j]) => {
+              const articles = archiveData.articlesByJurisdiction[code] || 0;
+              const regs = archiveData.regulationsByJurisdiction[code] || 0;
+              const total = articles + regs * 5; // weight regs higher
+              if (articles === 0 && regs === 0) return null;
+              const max = Math.max(...Object.entries(JURISDICTIONS).map(([c]) => (archiveData.articlesByJurisdiction[c] || 0) + (archiveData.regulationsByJurisdiction[c] || 0) * 5));
+              const pct = (total / max) * 100;
+              return (
+                <button
+                  key={code}
+                  onClick={() => setJFilter(code === jFilter ? 'all' : code)}
+                  className={`w-full flex items-center gap-3 group cursor-pointer ${jFilter === code ? 'opacity-100' : 'opacity-90 hover:opacity-100'}`}
+                >
+                  <span className="text-[18px] w-6">{j.flag}</span>
+                  <div className="flex-1 text-left">
+                    <div className="flex items-center justify-between mb-1">
+                      <span className={`text-[12px] font-semibold ${jFilter === code ? 'text-green-deep' : 'text-gray-600'}`}>
+                        {lang === 'en' ? j.nameEn : j.name}
+                      </span>
+                      <span className="text-[11px] text-gray-400">
+                        {articles > 0 && `${articles} ${t('법률', 'laws')}`}
+                        {articles > 0 && regs > 0 && ' · '}
+                        {regs > 0 && `${regs} ${t('법안', 'bills')}`}
+                      </span>
+                    </div>
+                    <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+                      <div className={`h-full rounded-full transition-all ${jFilter === code ? 'bg-green-deep' : 'bg-green-deep/50 group-hover:bg-green-deep/80'}`} style={{ width: `${pct}%` }} />
+                    </div>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        </div>
       </div>
 
-      {/* Jurisdiction Filter */}
-      <div className="flex gap-2 mb-6 flex-wrap">
-        {[{ code: 'all', flag: '', name: '전체', nameEn: 'All' }, ...Object.entries(JURISDICTIONS).map(([code, j]) => ({ code, ...j }))].map(j => (
-          <button key={j.code} onClick={() => setJFilter(j.code)}
-            className={`px-3 py-1.5 rounded-full text-[12px] font-medium border transition-all cursor-pointer ${jFilter === j.code ? 'bg-green-deep text-white border-green-deep' : 'bg-white text-gray-500 border-gray-200'}`}>
-            {j.flag ? `${j.flag} ` : ''}{lang === 'en' ? j.nameEn : j.name}
-          </button>
-        ))}
+      {/* ═══ SEARCH + FILTER + VIEW MODE ═══ */}
+      <div className="bg-white border border-[#e8e8e6] rounded-xl p-4 mb-6">
+        <div className="flex items-center gap-3 flex-wrap">
+          {/* Search */}
+          <div className="relative flex-1 min-w-[240px]">
+            <Icon name="search" size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+            <input
+              type="text"
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              placeholder={t('법안명, 키워드로 검색...', 'Search by bill name, keyword...')}
+              className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-gray-200 text-sm focus:outline-none focus:border-green-deep/40"
+            />
+          </div>
+          {/* View toggle */}
+          <div className="flex border border-gray-200 rounded-lg overflow-hidden">
+            {(['kanban', 'list'] as const).map(m => (
+              <button key={m} onClick={() => setViewMode(m)}
+                className={`px-3 py-2 text-[12px] font-semibold transition-all ${viewMode === m ? 'bg-green-deep text-white' : 'bg-white text-gray-500 hover:bg-gray-50'}`}>
+                {m === 'kanban' ? t('칸반', 'Kanban') : t('리스트', 'List')}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Jurisdiction chips */}
+        <div className="flex gap-2 mt-3 flex-wrap">
+          {[{ code: 'all', flag: '', name: '전체', nameEn: 'All' }, ...Object.entries(JURISDICTIONS).map(([code, j]) => ({ code, ...j }))].map(j => {
+            const count = j.code === 'all' ? regulations.length : regulations.filter((r: any) => r.jurisdiction === j.code).length;
+            if (j.code !== 'all' && count === 0) return null;
+            return (
+              <button key={j.code} onClick={() => setJFilter(j.code)}
+                className={`px-3 py-1 rounded-full text-[12px] font-medium border transition-all cursor-pointer ${jFilter === j.code ? 'bg-green-deep text-white border-green-deep' : 'bg-white text-gray-500 border-gray-200 hover:border-gray-300'}`}>
+                {j.flag ? `${j.flag} ` : ''}{lang === 'en' ? j.nameEn : j.name} <span className="opacity-60">({count})</span>
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Active filter info */}
+        {(search || jFilter !== 'all') && (
+          <div className="flex items-center gap-2 mt-3 text-[12px] text-gray-500">
+            <span>{filtered.length} {t('건의 결과', 'results')}</span>
+            <button onClick={() => { setSearch(''); setJFilter('all'); }} className="text-green-deep hover:underline">{t('필터 초기화', 'Clear filters')}</button>
+          </div>
+        )}
       </div>
 
-      {/* Kanban */}
+      {/* ═══ KANBAN ═══ */}
       {viewMode === 'kanban' && (
-        <div className="flex gap-4 overflow-x-auto pb-4">
+        <div className="flex gap-4 overflow-x-auto pb-4 mb-10">
           {kanbanCols.map(col => (
-            <div key={col.status} className="min-w-[230px] flex-1">
+            <div key={col.status} className="min-w-[240px] flex-1">
               <div className="flex items-center gap-2 mb-3 px-1">
                 <Badge color={col.label.color}>{lang === 'en' ? col.label.en : col.label.ko}</Badge>
                 <span className="text-[12px] text-gray-400">{col.items.length}</span>
               </div>
               <div className="space-y-2">
-                {col.items.map((r: any) => (
+                {col.items.slice(0, 10).map((r: any) => (
                   <div key={r.id} onClick={() => setSelReg(r)} className="bg-white border border-[#e8e8e6] rounded-lg p-3.5 hover:border-green-deep/30 hover:shadow-sm transition-all cursor-pointer">
                     <div className="flex items-center gap-1.5 mb-1.5">
                       <span className="text-[13px]">{JURISDICTIONS[r.jurisdiction]?.flag}</span>
@@ -147,6 +306,9 @@ export default function DashboardClient({ regulations, trends, briefings, stats 
                     {r.impactScore && <ImpactBar score={r.impactScore} />}
                   </div>
                 ))}
+                {col.items.length > 10 && (
+                  <div className="text-[11px] text-gray-400 text-center py-2">+{col.items.length - 10} {t('더 보기', 'more')}</div>
+                )}
                 {col.items.length === 0 && <div className="py-8 text-center text-gray-300 text-[12px] border border-dashed border-gray-200 rounded-lg">{t('없음', 'None')}</div>}
               </div>
             </div>
@@ -154,10 +316,10 @@ export default function DashboardClient({ regulations, trends, briefings, stats 
         </div>
       )}
 
-      {/* List */}
+      {/* ═══ LIST ═══ */}
       {viewMode === 'list' && (
-        <div className="bg-white border border-[#e8e8e6] rounded-xl overflow-hidden">
-          {filtered.map((r: any, i: number) => (
+        <div className="bg-white border border-[#e8e8e6] rounded-xl overflow-hidden mb-10">
+          {filtered.slice(0, 50).map((r: any, i: number) => (
             <div key={r.id} onClick={() => setSelReg(r)} className={`flex items-center gap-4 px-5 py-4 hover:bg-green-50/50 transition-colors cursor-pointer ${i < filtered.length - 1 ? 'border-b border-gray-100' : ''}`}>
               <span className="text-[16px]">{JURISDICTIONS[r.jurisdiction]?.flag}</span>
               <Badge color={STATUS_LABELS[r.status]?.color || 'gray'}>{lang === 'en' ? STATUS_LABELS[r.status]?.en : STATUS_LABELS[r.status]?.ko}</Badge>
@@ -169,15 +331,20 @@ export default function DashboardClient({ regulations, trends, briefings, stats 
               <div className="text-[12px] text-gray-400 whitespace-nowrap hidden md:block">{r.updatedAt?.slice(0, 10)}</div>
             </div>
           ))}
-          {filtered.length === 0 && <div className="py-12 text-center text-gray-400">{t('추적 중인 법안이 없습니다.', 'No tracked regulations.')}</div>}
+          {filtered.length > 50 && <div className="px-5 py-3 text-center text-[12px] text-gray-400">+{filtered.length - 50} {t('건 더 있음', 'more results')}</div>}
+          {filtered.length === 0 && <div className="py-12 text-center text-gray-400">{t('결과가 없습니다.', 'No results.')}</div>}
         </div>
       )}
 
-      {/* Bottom: Trends + Briefings */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-10">
+      {/* ═══ TRENDS + BRIEFINGS ═══ */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Trends Cloud */}
         <div>
-          <h2 className="text-[16px] font-bold mb-4 flex items-center gap-2"><Icon name="search" size={16} className="text-green-deep" />{t('정책 트렌드', 'Policy Trends')}</h2>
+          <h2 className="text-[16px] font-bold mb-4 flex items-center gap-2">
+            <Icon name="search" size={16} className="text-green-deep" />
+            {t('정책 트렌드', 'Policy Trends')}
+            {trends.length > 0 && <span className="text-[12px] text-gray-400 font-normal">({trends.length})</span>}
+          </h2>
           {trends.length > 0 ? (
             <div className="bg-white border border-[#e8e8e6] rounded-xl p-5">
               <div className="flex flex-wrap gap-2">
@@ -195,7 +362,10 @@ export default function DashboardClient({ regulations, trends, briefings, stats 
 
         {/* Briefings */}
         <div>
-          <h2 className="text-[16px] font-bold mb-4 flex items-center gap-2"><Icon name="file" size={16} className="text-green-deep" />{t('AI 정책 브리핑', 'AI Policy Briefings')}</h2>
+          <h2 className="text-[16px] font-bold mb-4 flex items-center gap-2">
+            <Icon name="file" size={16} className="text-green-deep" />
+            {t('AI 정책 브리핑', 'AI Policy Briefings')}
+          </h2>
           {briefings.length > 0 ? (
             <div className="space-y-3">
               {briefings.map((b: any) => (
@@ -210,9 +380,23 @@ export default function DashboardClient({ regulations, trends, briefings, stats 
         </div>
       </div>
 
+      {/* ═══ CTA: Try the AI Consulting ═══ */}
+      <div className="mt-12 bg-gradient-to-br from-green-pale to-white border border-green-deep/20 rounded-2xl p-8 md:p-10 text-center">
+        <div className="text-[11px] font-bold tracking-widest uppercase text-green-deep mb-3">{t('맞춤 컴플라이언스 가이드', 'Personalized Compliance Guide')}</div>
+        <h2 className="text-2xl md:text-3xl font-bold mb-3">{t('내 사업에 어떤 영향이 있는지 알아보세요', 'Find out how this affects your business')}</h2>
+        <p className="text-gray-500 max-w-xl mx-auto mb-6 leading-relaxed">
+          {t(
+            '비즈니스 정보를 입력하면 AI가 5,089개 조문을 참조해 맞춤형 컴플라이언스 가이드를 생성합니다.',
+            'Enter your business details and AI will generate a personalized compliance guide referencing 5,089 articles.'
+          )}
+        </p>
+        <a href="/consult" className="inline-flex items-center gap-2 px-6 py-3 bg-green-deep text-white rounded-lg text-sm font-bold hover:bg-green-deep/90 transition">
+          {t('규제 컨설팅 시작하기', 'Start Regulatory Consulting')} <Icon name="arrow" size={14} />
+        </a>
+      </div>
+
       {/* ═══ MODALS ═══ */}
 
-      {/* Regulation Detail */}
       {selReg && (
         <Modal onClose={() => setSelReg(null)} wide>
           <div className="flex items-center justify-between mb-4">
@@ -249,63 +433,44 @@ export default function DashboardClient({ regulations, trends, briefings, stats 
         </Modal>
       )}
 
-      {/* Trend Detail */}
       {selTrend && (
         <Modal onClose={() => setSelTrend(null)}>
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-[20px] font-bold">{bi(selTrend.keyword, selTrend.keywordEn)}</h2>
+            <div className="flex items-center gap-2">
+              <Badge color={selTrend.score >= 80 ? 'red' : selTrend.score >= 60 ? 'amber' : 'green'}>Score {Math.round(selTrend.score)}</Badge>
+              {selTrend.spikeDetected && <Badge color="red">🔥 {t('급상승', 'Spike')}</Badge>}
+            </div>
             <button onClick={() => setSelTrend(null)} className="text-gray-400 hover:text-gray-600"><Icon name="x" size={20} /></button>
           </div>
-          <div className="grid grid-cols-3 gap-3 mb-5">
-            <div className="bg-gray-50 rounded-lg p-3 text-center">
-              <div className="text-[11px] text-gray-400">{t('점수', 'Score')}</div>
-              <div className="text-[22px] font-bold" style={{ color: selTrend.score >= 80 ? '#dc2626' : selTrend.score >= 50 ? '#d97706' : '#059669' }}>{Math.round(selTrend.score)}</div>
-            </div>
-            <div className="bg-gray-50 rounded-lg p-3 text-center">
-              <div className="text-[11px] text-gray-400">{t('언급 수', 'Mentions')}</div>
-              <div className="text-[22px] font-bold">{selTrend.mentions}</div>
-            </div>
-            <div className="bg-gray-50 rounded-lg p-3 text-center">
-              <div className="text-[11px] text-gray-400">{t('상태', 'Status')}</div>
-              <div className="text-[14px] font-semibold mt-1">{selTrend.score >= 80 ? '🔴 Hot' : selTrend.score >= 50 ? '🟡 Rising' : '🟢 Steady'}</div>
-            </div>
-          </div>
-          {selTrend.relatedTags?.length > 0 && (
-            <div className="mb-4">
-              <div className="text-[12px] font-semibold text-gray-400 mb-2">{t('관련 키워드', 'Related')}</div>
-              <div className="flex gap-1.5 flex-wrap">{selTrend.relatedTags.map((tag: string) => <span key={tag} className="text-[12px] bg-green-50 text-green-700 px-2.5 py-1 rounded-full">{tag}</span>)}</div>
+          <h2 className="text-[22px] font-bold mb-1">{bi(selTrend.keyword, selTrend.keywordEn)}</h2>
+          <div className="text-[12px] text-gray-400 mb-4">{selTrend.mentions} {t('회 언급', 'mentions')} · {selTrend.jurisdictions?.join(', ')}</div>
+          {selTrend.aiSummary && (
+            <div className="bg-green-50 rounded-lg p-4 mb-4">
+              <p className="text-[14px] text-gray-600 leading-relaxed">{bi(selTrend.aiSummary, selTrend.aiSummaryEn)}</p>
             </div>
           )}
-          {/* Related regulations */}
-          {(() => {
-            const kw = (selTrend.keywordEn || selTrend.keyword).toLowerCase();
-            const related = regulations.filter((r: any) => r.tags?.some((t: string) => kw.includes(t.toLowerCase())) || r.title?.toLowerCase().includes(kw) || r.titleEn?.toLowerCase().includes(kw)).slice(0, 3);
-            if (!related.length) return null;
-            return (
-              <div>
-                <div className="text-[12px] font-semibold text-gray-400 mb-2">{t('관련 법안', 'Related regulations')}</div>
-                {related.map((r: any) => (
-                  <div key={r.id} onClick={() => { setSelTrend(null); setSelReg(r); }} className="flex items-center gap-2 py-2 border-b border-gray-100 cursor-pointer hover:bg-gray-50 -mx-2 px-2 rounded">
-                    <span>{JURISDICTIONS[r.jurisdiction]?.flag}</span>
-                    <span className="text-[13px] font-medium flex-1 truncate">{bi(r.title, r.titleEn)}</span>
-                    <Icon name="arrow" size={12} className="text-gray-300" />
-                  </div>
-                ))}
-              </div>
-            );
-          })()}
+          {selTrend.relatedTags?.length > 0 && (
+            <div>
+              <div className="text-[12px] font-bold text-gray-400 uppercase tracking-wider mb-2">{t('연관 키워드', 'Related Tags')}</div>
+              <div className="flex gap-1.5 flex-wrap">{selTrend.relatedTags.map((tag: string) => <span key={tag} className="text-[12px] bg-gray-100 text-gray-600 px-2.5 py-1 rounded-full">{tag}</span>)}</div>
+            </div>
+          )}
         </Modal>
       )}
 
-      {/* Briefing Detail */}
       {selBriefing && (
         <Modal onClose={() => setSelBriefing(null)} wide>
           <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-2"><Badge color="blue">{selBriefing.type === 'daily' ? t('일간 브리핑', 'Daily') : t('주간 브리핑', 'Weekly')}</Badge><span className="text-[12px] text-gray-400">{selBriefing.generatedAt?.slice(0, 10)}</span></div>
+            <div className="flex items-center gap-2">
+              <Badge color="blue">{selBriefing.type === 'daily' ? t('일간 브리핑', 'Daily Briefing') : t('주간 브리핑', 'Weekly Briefing')}</Badge>
+              <span className="text-[12px] text-gray-400">{selBriefing.generatedAt?.slice(0, 10)}</span>
+            </div>
             <button onClick={() => setSelBriefing(null)} className="text-gray-400 hover:text-gray-600"><Icon name="x" size={20} /></button>
           </div>
-          <h2 className="text-[20px] font-bold mb-4">{bi(selBriefing.title, selBriefing.titleEn)}</h2>
-          <div className="text-[14px] text-gray-600 leading-relaxed whitespace-pre-wrap">{bi(selBriefing.content, selBriefing.contentEn)}</div>
+          <h2 className="text-[22px] font-bold mb-4">{bi(selBriefing.title, selBriefing.titleEn)}</h2>
+          <div className="prose prose-sm max-w-none">
+            <p className="text-[14px] text-gray-700 leading-relaxed whitespace-pre-wrap">{bi(selBriefing.content, selBriefing.contentEn)}</p>
+          </div>
         </Modal>
       )}
     </div>
