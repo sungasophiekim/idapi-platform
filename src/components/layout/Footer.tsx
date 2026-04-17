@@ -57,6 +57,7 @@ export default function Footer() {
             <div className="space-y-2">
               <Link href="/about" className="block text-[13px] text-white/60 hover:text-white transition-colors">About IDAPI</Link>
               <Link href="/team" className="block text-[13px] text-white/60 hover:text-white transition-colors">{t('팀 소개', 'Our Team')}</Link>
+              <Link href="/sponsors" className="block text-[13px] text-white/60 hover:text-white transition-colors">{t('후원 안내', 'Sponsorship')}</Link>
             </div>
           </div>
         </div>

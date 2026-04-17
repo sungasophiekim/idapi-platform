@@ -120,6 +120,27 @@ export default function DashboardClient({ regulations, trends, briefings, stats,
 
   const maxMonth = Math.max(...monthlyData.map(m => m.count), 1);
 
+  const countryDots = useMemo(() => [
+    { code: 'US', flag: '\u{1F1FA}\u{1F1F8}', name: '\uBBF8\uAD6D', nameEn: 'United States', x: '18%', y: '35%', activity: (archiveData.regulationsByJurisdiction['US'] || 0) + (archiveData.articlesByJurisdiction['US'] || 0) / 10 },
+    { code: 'EU', flag: '\u{1F1EA}\u{1F1FA}', name: 'EU', nameEn: 'EU', x: '45%', y: '25%', activity: (archiveData.regulationsByJurisdiction['EU'] || 0) + (archiveData.articlesByJurisdiction['EU'] || 0) / 10 },
+    { code: 'KR', flag: '\u{1F1F0}\u{1F1F7}', name: '\uD55C\uAD6D', nameEn: 'Korea', x: '78%', y: '35%', activity: (archiveData.regulationsByJurisdiction['KR'] || 0) + (archiveData.articlesByJurisdiction['KR'] || 0) / 10 },
+    { code: 'JP', flag: '\u{1F1EF}\u{1F1F5}', name: '\uC77C\uBCF8', nameEn: 'Japan', x: '83%', y: '38%', activity: (archiveData.regulationsByJurisdiction['JP'] || 0) + (archiveData.articlesByJurisdiction['JP'] || 0) / 10 },
+    { code: 'SG', flag: '\u{1F1F8}\u{1F1EC}', name: '\uC2F1\uAC00\uD3EC\uB974', nameEn: 'Singapore', x: '72%', y: '62%', activity: (archiveData.regulationsByJurisdiction['SG'] || 0) + (archiveData.articlesByJurisdiction['SG'] || 0) / 10 },
+    { code: 'HK', flag: '\u{1F1ED}\u{1F1F0}', name: '\uD64D\uCF69', nameEn: 'Hong Kong', x: '76%', y: '48%', activity: (archiveData.regulationsByJurisdiction['HK'] || 0) + (archiveData.articlesByJurisdiction['HK'] || 0) / 10 },
+  ], [archiveData, lang]);
+
+  const topBills = useMemo(() => {
+    return regulations
+      .filter((r: any) => r.status !== 'WITHDRAWN' && r.status !== 'REJECTED')
+      .sort((a: any, b: any) => {
+        const statusWeight: Record<string, number> = { ENACTED: 5, PASSED: 4, FLOOR_VOTE: 3, COMMITTEE: 2, PROPOSED: 1 };
+        const aW = (statusWeight[a.status] || 0) + (a.impactScore || 0) / 10;
+        const bW = (statusWeight[b.status] || 0) + (b.impactScore || 0) / 10;
+        return bW - aW;
+      })
+      .slice(0, 8);
+  }, [regulations]);
+
   // ─── Sub-components ───
   const ImpactBar = ({ score }: { score: number }) => (
     <div className="flex items-center gap-1">
@@ -313,6 +334,75 @@ export default function DashboardClient({ regulations, trends, briefings, stats,
               );
             })}
           </div>
+        </div>
+      </div>
+
+      {/* ═══ WORLD MAP ═══ */}
+      <div className="bg-white border border-[#e8e8e6] rounded-2xl p-6 mb-8">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-[15px] font-bold">{t('\uAE00\uB85C\uBC8C \uADDC\uC81C \uD65C\uB3D9 \uC9C0\uB3C4', 'Global Regulatory Activity Map')}</h3>
+          <p className="text-[11px] text-gray-400">{t('\uAD6D\uAC00\uB97C \uD074\uB9AD\uD558\uC5EC \uD544\uD130\uB9C1', 'Click a country to filter')}</p>
+        </div>
+        <div className="relative bg-green-50/30 rounded-xl p-8 overflow-hidden" style={{ minHeight: '280px' }}>
+          {countryDots.map(dot => (
+            <button key={dot.code} onClick={() => setJFilter(dot.code === jFilter ? 'all' : dot.code)}
+              className="absolute flex flex-col items-center gap-1 group transition-transform hover:scale-110"
+              style={{ left: dot.x, top: dot.y }}>
+              <div className={`rounded-full transition-all ${jFilter === dot.code ? 'ring-4 ring-green-deep/30' : ''}`}
+                style={{
+                  width: Math.max(24, Math.min(60, dot.activity / 2)),
+                  height: Math.max(24, Math.min(60, dot.activity / 2)),
+                  background: `rgba(32, 62, 51, ${Math.max(0.3, Math.min(0.9, dot.activity / 120))})`,
+                }}>
+                <span className="text-white text-[10px] font-bold flex items-center justify-center h-full">{dot.activity}</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <span className="text-[14px]">{dot.flag}</span>
+                <span className="text-[11px] font-semibold text-gray-600 group-hover:text-green-deep">{lang === 'en' ? dot.nameEn : dot.name}</span>
+              </div>
+            </button>
+          ))}
+          {/* Decorative grid lines */}
+          <div className="absolute inset-0 pointer-events-none opacity-10">
+            <div className="absolute top-1/4 left-0 right-0 h-px bg-green-deep" />
+            <div className="absolute top-1/2 left-0 right-0 h-px bg-green-deep" />
+            <div className="absolute top-3/4 left-0 right-0 h-px bg-green-deep" />
+            <div className="absolute left-1/4 top-0 bottom-0 w-px bg-green-deep" />
+            <div className="absolute left-1/2 top-0 bottom-0 w-px bg-green-deep" />
+            <div className="absolute left-3/4 top-0 bottom-0 w-px bg-green-deep" />
+          </div>
+        </div>
+      </div>
+
+      {/* ═══ BILL TIMELINE ═══ */}
+      <div className="bg-white border border-[#e8e8e6] rounded-2xl p-6 mb-8">
+        <h3 className="text-[15px] font-bold mb-1">{t('\uC8FC\uC694 \uBC95\uC548 \uC9C4\uD589 \uD604\uD669', 'Key Bill Progress Timeline')}</h3>
+        <p className="text-[12px] text-gray-400 mb-5">{t('\uBC1C\uC758 \u2192 \uC704\uC6D0\uD68C \u2192 \uBCF8\uD68C\uC758 \u2192 \uC2DC\uD589', 'Proposed \u2192 Committee \u2192 Floor Vote \u2192 Enacted')}</p>
+        <div className="space-y-3">
+          {topBills.map((bill: any) => {
+            const stages = ['PROPOSED', 'COMMITTEE', 'FLOOR_VOTE', 'PASSED', 'ENACTED'];
+            const currentIdx = stages.indexOf(bill.status);
+            const progress = ((currentIdx + 1) / stages.length) * 100;
+            return (
+              <div key={bill.id} className="flex items-center gap-3 group cursor-pointer" onClick={() => setSelReg(bill)}>
+                <div className="w-6 text-center text-[14px]">{JURISDICTIONS[bill.jurisdiction]?.flag}</div>
+                <div className="flex-1 min-w-0">
+                  <div className="text-[12px] font-semibold text-gray-700 truncate mb-1 group-hover:text-green-deep">{bi(bill.title, bill.titleEn)}</div>
+                  <div className="h-2.5 bg-gray-100 rounded-full overflow-hidden">
+                    <div className={`h-full rounded-full transition-all ${
+                      bill.status === 'ENACTED' ? 'bg-green-500' :
+                      bill.status === 'PASSED' ? 'bg-green-400' :
+                      bill.status === 'FLOOR_VOTE' ? 'bg-amber-400' :
+                      bill.status === 'COMMITTEE' ? 'bg-blue-400' : 'bg-gray-300'
+                    }`} style={{ width: `${progress}%` }} />
+                  </div>
+                </div>
+                <Badge color={STATUS_LABELS[bill.status]?.color || 'gray'}>
+                  {lang === 'en' ? STATUS_LABELS[bill.status]?.en : STATUS_LABELS[bill.status]?.ko}
+                </Badge>
+              </div>
+            );
+          })}
         </div>
       </div>
 
