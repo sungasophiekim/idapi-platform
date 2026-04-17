@@ -28,6 +28,21 @@ const STATUS_LABELS: Record<string, { ko: string; en: string; color: string }> =
 
 const STATUS_ORDER = ['PROPOSED', 'COMMITTEE', 'FLOOR_VOTE', 'PASSED', 'ENACTED'];
 
+interface PIIData {
+  score: number;
+  change: number;
+  trend: 'up' | 'down' | 'flat';
+  breakdown: Record<string, { count: number; score: number }>;
+  topEvents: string[];
+  generatedAt: string;
+}
+
+interface WeeklySummaryData {
+  summary: string;
+  summaryEn: string;
+  highlights: { ko: string; en: string }[];
+}
+
 interface Props {
   regulations: any[];
   trends: any[];
@@ -39,9 +54,11 @@ interface Props {
     articlesByJurisdiction: Record<string, number>;
     regulationsByJurisdiction: Record<string, number>;
   };
+  pii: PIIData | null;
+  weeklySummary: WeeklySummaryData | null;
 }
 
-export default function DashboardClient({ regulations, trends, briefings, stats, archiveData }: Props) {
+export default function DashboardClient({ regulations, trends, briefings, stats, archiveData, pii, weeklySummary }: Props) {
   const { lang, t, bi } = useLang();
   const [jFilter, setJFilter] = useState('all');
   const [viewMode, setViewMode] = useState<'kanban' | 'list'>('kanban');
@@ -49,6 +66,21 @@ export default function DashboardClient({ regulations, trends, briefings, stats,
   const [selReg, setSelReg] = useState<any>(null);
   const [selBriefing, setSelBriefing] = useState<any>(null);
   const [search, setSearch] = useState('');
+  const [nlEmail, setNlEmail] = useState('');
+  const [nlStatus, setNlStatus] = useState<'idle' | 'loading' | 'done' | 'error'>('idle');
+
+  const handleNewsletter = async () => {
+    if (!nlEmail || !nlEmail.includes('@')) return;
+    setNlStatus('loading');
+    try {
+      const res = await fetch('/api/newsletter', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: nlEmail }),
+      });
+      setNlStatus(res.ok ? 'done' : 'error');
+    } catch { setNlStatus('error'); }
+  };
 
   // Filtering: jurisdiction + search
   const filtered = useMemo(() => {
@@ -109,35 +141,81 @@ export default function DashboardClient({ regulations, trends, briefings, stats,
   return (
     <div className="pt-28 pb-20 max-w-[1280px] mx-auto px-6">
 
-      {/* ═══ HERO ═══ */}
-      <div className="bg-gradient-to-br from-green-deep to-green-deep/80 text-white rounded-2xl p-8 md:p-10 mb-8">
+      {/* ═══ HERO: PII INDEX ═══ */}
+      <div className="bg-gradient-to-br from-green-deep via-green-deep/90 to-green-deep/80 text-white rounded-2xl p-8 md:p-10 mb-6">
         <div className="flex items-start justify-between flex-wrap gap-6">
           <div className="max-w-2xl">
-            <div className="text-[11px] font-bold tracking-widest uppercase text-white/70 mb-3">{t('정책 인텔리전스 대시보드', 'Policy Intelligence Dashboard')}</div>
+            <div className="text-[11px] font-bold tracking-widest uppercase text-white/70 mb-3">{t('IDAPI 정책 인텔리전스', 'IDAPI Policy Intelligence')}</div>
             <h1 className="text-3xl md:text-[40px] font-bold tracking-tight leading-tight mb-3">
               {t('글로벌 디지털자산 정책 레이더', 'Global Digital Asset Policy Radar')}
             </h1>
-            <p className="text-white/80 text-[15px] leading-relaxed">
+            <p className="text-white/70 text-[14px] leading-relaxed">
               {t(
-                '6개국 75개 법률, 5,089개 조문, 96개 진행 중 법안을 실시간 추적하고 AI가 분석합니다.',
-                'Real-time tracking of 75 laws, 5,089 articles, and 96 pending bills across 6 jurisdictions, analyzed by AI.'
+                `${archiveData.totalArticles.toLocaleString()}개 조문 · ${archiveData.totalLaws}개 법률 · ${stats.total}개 법안 — 6개국 실시간 추적`,
+                `${archiveData.totalArticles.toLocaleString()} articles · ${archiveData.totalLaws} laws · ${stats.total} bills — 6 jurisdictions tracked`
               )}
             </p>
           </div>
 
-          {/* Big stat badges */}
-          <div className="grid grid-cols-3 gap-3 md:gap-5">
-            {[
-              { v: archiveData.totalArticles.toLocaleString(), l: t('조문', 'Articles') },
-              { v: archiveData.totalLaws, l: t('법률', 'Laws') },
-              { v: stats.total, l: t('법안', 'Bills') },
-            ].map(s => (
-              <div key={s.l} className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl px-4 py-3 text-center min-w-[80px]">
-                <div className="text-2xl md:text-3xl font-bold">{s.v}</div>
-                <div className="text-[10px] uppercase tracking-wider text-white/60 mt-0.5">{s.l}</div>
+          {/* PII Score */}
+          {pii && (
+            <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl p-6 text-center min-w-[200px]">
+              <div className="text-[10px] uppercase tracking-widest text-white/60 mb-2">{t('정책활동지수', 'Policy Activity Index')}</div>
+              <div className="text-5xl font-bold mb-1">{pii.score}</div>
+              <div className={`text-[14px] font-semibold ${pii.trend === 'up' ? 'text-green-300' : pii.trend === 'down' ? 'text-red-300' : 'text-white/60'}`}>
+                {pii.trend === 'up' ? '▲' : pii.trend === 'down' ? '▼' : '—'} {pii.change > 0 ? '+' : ''}{pii.change} {t('전주 대비', 'vs last week')}
               </div>
-            ))}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* ═══ WEEKLY SUMMARY + NEWSLETTER ═══ */}
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 mb-8">
+        {/* Weekly 3-line summary */}
+        <div className="lg:col-span-3 bg-white border border-[#e8e8e6] rounded-xl p-6">
+          <div className="flex items-center gap-2 mb-4">
+            <span className="w-2 h-2 bg-green-500 rounded-full"></span>
+            <h3 className="text-[14px] font-bold">{t('이번 주 핵심 동향', "This Week's Highlights")}</h3>
           </div>
+          {weeklySummary && weeklySummary.highlights.length > 0 ? (
+            <div className="space-y-2.5">
+              {weeklySummary.highlights.map((h, i) => (
+                <div key={i} className="flex items-start gap-3 text-[14px] leading-relaxed text-gray-700">
+                  <span className="text-[12px] bg-green-50 text-green-700 rounded-full w-5 h-5 flex items-center justify-center font-bold shrink-0 mt-0.5">{i + 1}</span>
+                  <span>{lang === 'en' ? h.en : h.ko}</span>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-[13px] text-gray-400">{t('이번 주 데이터를 집계 중입니다.', 'Aggregating this week\'s data.')}</p>
+          )}
+        </div>
+
+        {/* Newsletter CTA */}
+        <div className="lg:col-span-2 bg-gradient-to-br from-green-50 to-white border border-green-deep/20 rounded-xl p-6">
+          <div className="text-[11px] font-bold tracking-widest uppercase text-green-deep mb-2">{t('주간 뉴스레터', 'Weekly Newsletter')}</div>
+          <h3 className="text-[16px] font-bold mb-2">{t('매주 정책 동향을 받아보세요', 'Get weekly policy updates')}</h3>
+          <p className="text-[12px] text-gray-500 mb-4 leading-relaxed">{t('매주 월요일, 디지털자산/AI 정책 핵심 요약을 이메일로 전달합니다.', 'Every Monday — digital asset & AI policy digest delivered to your inbox.')}</p>
+          {nlStatus === 'done' ? (
+            <div className="text-[14px] text-green-700 font-semibold flex items-center gap-2">✓ {t('구독 완료!', 'Subscribed!')}</div>
+          ) : (
+            <div className="flex gap-2">
+              <input
+                type="email"
+                value={nlEmail}
+                onChange={e => setNlEmail(e.target.value)}
+                placeholder={t('이메일 주소', 'Email address')}
+                className="flex-1 px-3.5 py-2.5 rounded-lg border border-gray-200 text-sm focus:outline-none focus:border-green-deep/40"
+                onKeyDown={e => e.key === 'Enter' && handleNewsletter()}
+              />
+              <button onClick={handleNewsletter} disabled={nlStatus === 'loading'}
+                className="px-4 py-2.5 bg-green-deep text-white rounded-lg text-[13px] font-bold hover:bg-green-deep/90 disabled:opacity-50 transition whitespace-nowrap">
+                {nlStatus === 'loading' ? '...' : t('구독', 'Subscribe')}
+              </button>
+            </div>
+          )}
+          {nlStatus === 'error' && <p className="text-[12px] text-red-500 mt-2">{t('구독 실패. 다시 시도해주세요.', 'Failed. Please try again.')}</p>}
         </div>
       </div>
 

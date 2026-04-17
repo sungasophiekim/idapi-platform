@@ -1,11 +1,13 @@
 // src/app/(public)/dashboard/page.tsx
 import { prisma } from '@/lib/db';
+import { calculatePII, generateWeeklySummary } from '@/modules/pii-index';
 import DashboardClient from './DashboardClient';
 
-export const revalidate = 300; // ISR: revalidate every 5 minutes
+export const revalidate = 300;
+export const dynamic = 'force-dynamic';
 
 export default async function DashboardPage() {
-  const [regulations, trends, briefings, stats, archiveStats] = await Promise.all([
+  const [regulations, trends, briefings, stats, archiveStats, pii, weeklySummary] = await Promise.all([
     prisma.regulation.findMany({
       orderBy: [{ impactScore: 'desc' }, { updatedAt: 'desc' }],
       take: 200,
@@ -32,6 +34,8 @@ export default async function DashboardPage() {
       prisma.lawArchive.groupBy({ by: ['jurisdiction'], _count: true }),
       prisma.regulation.groupBy({ by: ['jurisdiction'], _count: true }),
     ]),
+    calculatePII().catch(() => null),
+    generateWeeklySummary().catch(() => null),
   ]);
 
   const [totalLaws, totalArticles, articlesByJur, regsByJur] = archiveStats;
@@ -48,6 +52,8 @@ export default async function DashboardPage() {
         articlesByJurisdiction: Object.fromEntries(articlesByJur.map(j => [j.jurisdiction, j._count])),
         regulationsByJurisdiction: Object.fromEntries(regsByJur.map(j => [j.jurisdiction, j._count])),
       }}
+      pii={pii ? JSON.parse(JSON.stringify(pii)) : null}
+      weeklySummary={weeklySummary ? JSON.parse(JSON.stringify(weeklySummary)) : null}
     />
   );
 }

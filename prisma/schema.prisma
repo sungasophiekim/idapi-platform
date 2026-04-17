@@ -350,6 +350,22 @@ model LawArticle {
 // PHASE 3+ RESERVED TABLES
 // ═══════════════════════════════════════════════════════════════
 
+// ─── Newsletter Subscribers ───
+model NewsletterSubscriber {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  name         String?
+  company      String?
+  role         String?  // researcher, business, government, media, other
+  jurisdictions String[] // interested jurisdictions
+  subscribedAt DateTime @default(now())
+  isActive     Boolean  @default(true)
+
+  @@index([email])
+  @@index([isActive])
+  @@map("newsletter_subscribers")
+}
+
 // Phase 3: Community & Policy Voice
 // model Survey            { ... }
 // model SurveyResponse    { ... }
