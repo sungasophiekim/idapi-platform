@@ -55,11 +55,11 @@ export default function AdminBillsPage() {
 
   useEffect(() => { load(); }, [jurisdiction]);
 
-  const runCollection = async (useTracker = false) => {
+  const runCollection = async (useTracker = false, useIntl = false) => {
     setCollecting(true);
     setResult(null);
     try {
-      const url = useTracker ? '/api/bill-tracker' : '/api/bills';
+      const url = useIntl ? '/api/bill-tracker/intl' : useTracker ? '/api/bill-tracker' : '/api/bills';
       const res = await fetch(url, { method: 'POST' });
       const data = await res.json();
       setResult(data);
@@ -88,7 +88,10 @@ export default function AdminBillsPage() {
             <Icon name="search" size={14} /> Collect (RSS/Bills)
           </Btn>
           <Btn onClick={() => runCollection(true)} disabled={collecting} size="sm">
-            {collecting ? <><span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> ...</> : <><Icon name="globe" size={14} /> Track 국회 Bills</>}
+            {collecting ? <><span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> ...</> : <><Icon name="globe" size={14} /> Track 국회</>}
+          </Btn>
+          <Btn onClick={() => runCollection(false, true)} disabled={collecting} size="sm" variant="outline">
+            <Icon name="globe" size={14} /> Track US/SG/JP/HK
           </Btn>
         </div>
       </div>
