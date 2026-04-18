@@ -68,6 +68,33 @@ export default function DashboardClient({ regulations, trends, briefings, stats,
   const [search, setSearch] = useState('');
   const [nlEmail, setNlEmail] = useState('');
   const [nlStatus, setNlStatus] = useState<'idle' | 'loading' | 'done' | 'error'>('idle');
+  const [feedbackPosition, setFeedbackPosition] = useState('');
+  const [feedbackComment, setFeedbackComment] = useState('');
+  const [feedbackEmail, setFeedbackEmail] = useState('');
+  const [feedbackSubmitting, setFeedbackSubmitting] = useState(false);
+  const [feedbackSubmitted, setFeedbackSubmitted] = useState<string | null>(null);
+
+  const submitFeedback = async () => {
+    if (!feedbackPosition || !selReg) return;
+    setFeedbackSubmitting(true);
+    try {
+      await fetch('/api/feedback', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          regulationId: selReg.id,
+          position: feedbackPosition,
+          comment: feedbackComment || undefined,
+          email: feedbackEmail || undefined,
+        }),
+      });
+      setFeedbackSubmitted(selReg.id);
+      setFeedbackPosition('');
+      setFeedbackComment('');
+      setFeedbackEmail('');
+    } catch { /* ignore */ }
+    setFeedbackSubmitting(false);
+  };
 
   const handleNewsletter = async () => {
     if (!nlEmail || !nlEmail.includes('@')) return;
@@ -598,6 +625,59 @@ export default function DashboardClient({ regulations, trends, briefings, stats,
             </div>
           )}
           {selReg.sourceUrl && <a href={selReg.sourceUrl} target="_blank" rel="noopener" className="inline-flex items-center gap-1 mt-4 text-[13px] text-green-deep font-semibold hover:underline">{t('원문 보기', 'View Source')} <Icon name="arrow" size={14} /></a>}
+
+          {/* ─── Feedback Section ─── */}
+          <div className="mt-6 pt-6 border-t border-gray-100">
+            <h3 className="text-[14px] font-bold mb-3 flex items-center gap-2">
+              <Icon name="users" size={16} className="text-green-deep" />
+              {t('이 법안에 대한 의견', 'Your Opinion on This Bill')}
+            </h3>
+
+            {feedbackSubmitted === selReg.id ? (
+              <div className="bg-green-50 border border-green-200 rounded-lg p-4 text-[13px] text-green-700 font-semibold">
+                ✓ {t('의견이 제출되었습니다. 감사합니다!', 'Thank you for your feedback!')}
+              </div>
+            ) : (
+              <div>
+                <div className="flex gap-2 mb-3">
+                  {[
+                    { value: 'support', ko: '찬성', en: 'Support', color: 'bg-green-50 border-green-200 text-green-700 hover:bg-green-100' },
+                    { value: 'conditional', ko: '조건부', en: 'Conditional', color: 'bg-amber-50 border-amber-200 text-amber-700 hover:bg-amber-100' },
+                    { value: 'oppose', ko: '반대', en: 'Oppose', color: 'bg-red-50 border-red-200 text-red-700 hover:bg-red-100' },
+                  ].map(opt => (
+                    <button key={opt.value} onClick={() => setFeedbackPosition(opt.value)}
+                      className={`flex-1 py-2.5 rounded-lg text-[13px] font-semibold border transition-all cursor-pointer ${
+                        feedbackPosition === opt.value ? opt.color + ' ring-2 ring-offset-1' : 'bg-white border-gray-200 text-gray-500'
+                      } ${feedbackPosition === opt.value ? 'ring-green-deep/30' : ''}`}>
+                      {lang === 'en' ? opt.en : opt.ko}
+                    </button>
+                  ))}
+                </div>
+                <textarea
+                  value={feedbackComment}
+                  onChange={e => setFeedbackComment(e.target.value)}
+                  placeholder={t('의견을 남겨주세요 (선택사항)', 'Leave your comment (optional)')}
+                  className="w-full px-3.5 py-2.5 rounded-lg border border-gray-200 text-[13px] resize-none h-20 focus:outline-none focus:border-green-deep/40 mb-3"
+                />
+                <div className="flex gap-2 items-center">
+                  <input
+                    type="email"
+                    value={feedbackEmail}
+                    onChange={e => setFeedbackEmail(e.target.value)}
+                    placeholder={t('이메일 (선택)', 'Email (optional)')}
+                    className="flex-1 px-3.5 py-2 rounded-lg border border-gray-200 text-[13px] focus:outline-none focus:border-green-deep/40"
+                  />
+                  <button
+                    onClick={submitFeedback}
+                    disabled={!feedbackPosition || feedbackSubmitting}
+                    className="px-5 py-2 bg-green-deep text-white rounded-lg text-[13px] font-semibold hover:bg-green-deep/90 disabled:opacity-40 transition whitespace-nowrap">
+                    {feedbackSubmitting ? '...' : t('제출', 'Submit')}
+                  </button>
+                </div>
+                <p className="text-[11px] text-gray-400 mt-2">{t('제출된 의견은 IDAPI 정책 제언 보고서에 익명으로 반영됩니다.', 'Feedback is anonymously included in IDAPI policy recommendation reports.')}</p>
+              </div>
+            )}
+          </div>
         </Modal>
       )}
 

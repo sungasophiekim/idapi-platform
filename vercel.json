@@ -1,0 +1,12 @@
+{
+  "crons": [
+    {
+      "path": "/api/cron/daily?secret=${CRON_SECRET}",
+      "schedule": "0 21 * * *"
+    },
+    {
+      "path": "/api/cron/weekly?secret=${CRON_SECRET}",
+      "schedule": "0 21 * * 0"
+    }
+  ]
+}

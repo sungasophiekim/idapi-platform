@@ -112,6 +112,18 @@ export default function ConsultPage() {
         <button onClick={() => setStep('form')} className="inline-flex items-center gap-1.5 text-[13px] font-semibold text-green-deep mb-6">
           <Icon name="back" size={16} /> {t('새로운 분석', 'New Analysis')}
         </button>
+        <button onClick={async () => {
+          const res = await fetch('/api/report/consult', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ report, profile: { companyName, description, businessTypes, targetJurisdictions: jurisdictions } }),
+          });
+          const html = await res.text();
+          const w = window.open('', '_blank');
+          if (w) { w.document.write(html); w.document.close(); }
+        }} className="inline-flex items-center gap-1.5 text-[13px] font-semibold text-green-deep ml-4 hover:underline cursor-pointer">
+          <Icon name="file" size={16} /> {t('PDF 다운로드', 'Download PDF')}
+        </button>
 
         <div className="flex items-center gap-3 mb-6">
           <h1 className="text-[24px] font-bold">{t('규제 컴플라이언스 리포트', 'Regulatory Compliance Report')}</h1>
