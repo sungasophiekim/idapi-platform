@@ -10,9 +10,11 @@ import { collectAssemblyBills } from '@/modules/bill-tracker';
 import { sendNotification } from '@/lib/notifications';
 
 export async function GET(req: NextRequest) {
-  // Verify cron secret
+  // Verify cron secret (Vercel sends Authorization: Bearer <CRON_SECRET>)
+  const authHeader = req.headers.get('authorization');
   const cronSecret = req.headers.get('x-cron-secret') || req.nextUrl.searchParams.get('secret');
-  if (cronSecret !== process.env.CRON_SECRET) {
+  const isAuthorized = (authHeader === `Bearer ${process.env.CRON_SECRET}`) || (cronSecret === process.env.CRON_SECRET);
+  if (!isAuthorized) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 

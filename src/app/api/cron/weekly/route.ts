@@ -11,8 +11,10 @@ import { prisma } from '@/lib/db';
 import { sendNotification } from '@/lib/notifications';
 
 export async function GET(req: NextRequest) {
+  const authHeader = req.headers.get('authorization');
   const cronSecret = req.headers.get('x-cron-secret') || req.nextUrl.searchParams.get('secret');
-  if (cronSecret !== process.env.CRON_SECRET) {
+  const isAuthorized = (authHeader === `Bearer ${process.env.CRON_SECRET}`) || (cronSecret === process.env.CRON_SECRET);
+  if (!isAuthorized) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
