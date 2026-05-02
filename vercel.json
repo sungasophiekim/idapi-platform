@@ -7,6 +7,10 @@
     {
       "path": "/api/cron/weekly",
       "schedule": "0 21 * * 0"
+    },
+    {
+      "path": "/api/trends/detect",
+      "schedule": "0 22 * * *"
     }
   ]
 }

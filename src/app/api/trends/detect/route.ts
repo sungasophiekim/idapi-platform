@@ -1,12 +1,44 @@
 // src/app/api/trends/detect/route.ts
-// POST: Trigger trend detection pipeline
-// GET:  Check last run status
-// Protected: admin/researcher only, OR cron secret
+// POST: Trigger trend detection pipeline (admin/researcher OR x-cron-secret)
+// GET:  Vercel Cron entrypoint (Authorization: Bearer CRON_SECRET)
+// Protected: admin/researcher OR cron secret
+
+export const maxDuration = 300;
+export const dynamic = 'force-dynamic';
 
 import { NextRequest, NextResponse } from 'next/server';
 import { getAuthUser, requireRole } from '@/lib/auth';
 import { UserRole } from '@prisma/client';
 import { runTrendDetection } from '@/modules/trend-engine';
+
+// GET /api/trends/detect — Vercel Cron entrypoint (daily)
+export async function GET(req: NextRequest) {
+  const authHeader = req.headers.get('authorization');
+  const cronSecret = req.headers.get('x-cron-secret') || req.nextUrl.searchParams.get('secret');
+  const isAuthorized =
+    (authHeader === `Bearer ${process.env.CRON_SECRET}`) ||
+    (cronSecret && cronSecret === process.env.CRON_SECRET);
+
+  if (!isAuthorized) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  const maxAgeDays = parseInt(req.nextUrl.searchParams.get('maxAgeDays') || '7', 10);
+
+  try {
+    const result = await runTrendDetection({ maxAgeDays });
+    return NextResponse.json({
+      success: true,
+      ...result,
+      topTrends: result.topTrends.slice(0, 10),
+    });
+  } catch (err: any) {
+    return NextResponse.json(
+      { error: 'Trend detection failed', message: err.message },
+      { status: 500 }
+    );
+  }
+}
 
 // POST /api/trends/detect — run the full pipeline
 export async function POST(req: NextRequest) {
