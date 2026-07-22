@@ -17,14 +17,28 @@ export default function Header() {
     return () => window.removeEventListener('scroll', h);
   }, []);
 
-  const navItems = [
+  type NavItem =
+    | { href: string; label: string }
+    | { label: string; children: { href: string; label: string }[] };
+
+  const navItems: NavItem[] = [
     { href: '/research', label: t('연구자료', 'Research') },
     { href: '/insights', label: t('인사이트', 'Insights') },
     { href: '/dashboard', label: t('정책 레이더', 'Policy Radar') },
-    { href: '/focus-areas', label: t('연구영역', 'Focus Areas') },
-    { href: '/about', label: t('소개', 'About') },
-    { href: '/team', label: t('팀 소개', 'Team') },
+    {
+      label: t('소개', 'About'),
+      children: [
+        { href: '/about', label: t('재단소개', 'The Institute') },
+        { href: '/team', label: t('팀 소개', 'Team') },
+      ],
+    },
   ];
+
+  const Chevron = () => (
+    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round" className="mt-px opacity-70">
+      <polyline points="6 9 12 15 18 9" />
+    </svg>
+  );
 
   return (
     <header className={`fixed top-0 left-0 right-0 z-50 bg-white/[0.94] backdrop-blur-xl border-b border-border transition-shadow duration-300 ${scrolled ? 'shadow-sm' : ''}`}>
@@ -43,9 +57,26 @@ export default function Header() {
         {/* Desktop Nav */}
         <nav className="hidden md:flex items-center gap-6" aria-label="Main navigation">
           {navItems.map(item => (
-            <Link key={item.href} href={item.href} className="text-sm font-medium text-gray-500 hover:text-green-deep transition-colors">
-              {item.label}
-            </Link>
+            'children' in item ? (
+              <div key={item.label} className="relative group">
+                <button className="text-sm font-medium text-gray-500 group-hover:text-green-deep transition-colors inline-flex items-center gap-1">
+                  {item.label}<Chevron />
+                </button>
+                <div className="absolute left-1/2 -translate-x-1/2 top-full pt-2 hidden group-hover:block">
+                  <div className="bg-white border border-border rounded-lg shadow-lg py-1.5 min-w-[150px]">
+                    {item.children.map(c => (
+                      <Link key={c.href} href={c.href} className="block px-4 py-2 text-sm font-medium text-gray-600 hover:text-green-deep hover:bg-green-50 transition-colors whitespace-nowrap">
+                        {c.label}
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <Link key={item.href} href={item.href} className="text-sm font-medium text-gray-500 hover:text-green-deep transition-colors">
+                {item.label}
+              </Link>
+            )
           ))}
 
           {/* Language Toggle */}
@@ -79,10 +110,24 @@ export default function Header() {
       {mobileOpen && (
         <nav className="md:hidden border-t border-border bg-white px-6 py-4 space-y-3" aria-label="Mobile navigation">
           {navItems.map(item => (
-            <Link key={item.href} href={item.href} onClick={() => setMobileOpen(false)}
-              className="block text-sm font-medium text-gray-600 py-2">
-              {item.label}
-            </Link>
+            'children' in item ? (
+              <div key={item.label}>
+                <div className="text-sm font-semibold text-gray-700 py-2">{item.label}</div>
+                <div className="pl-3 border-l border-border ml-1 space-y-1">
+                  {item.children.map(c => (
+                    <Link key={c.href} href={c.href} onClick={() => setMobileOpen(false)}
+                      className="block text-sm font-medium text-gray-500 py-1.5">
+                      {c.label}
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            ) : (
+              <Link key={item.href} href={item.href} onClick={() => setMobileOpen(false)}
+                className="block text-sm font-medium text-gray-600 py-2">
+                {item.label}
+              </Link>
+            )
           ))}
           <div className="flex gap-2 pt-2 items-center">
             {(['ko', 'en'] as const).map(l => (
