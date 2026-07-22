@@ -366,6 +366,43 @@ model NewsletterSubscriber {
   @@map("newsletter_subscribers")
 }
 
+// Research authoring — AI editor-in-chief drafting pipeline
+enum DraftStage {
+  IDEA           // researcher entered topic + key points
+  FRAME          // AI generated a guide outline
+  DRAFTING       // researcher writing against the frame draft
+  AI_REVIEW      // AI editor produced feedback
+  EDITOR_REVIEW  // human editor reviewing
+  REVISION       // revisions requested
+  READY          // approved, ready to publish
+  PUBLISHED      // published as a Post
+}
+
+model ResearchDraft {
+  id           String       @id @default(cuid())
+  authorId     String?      // researcher (User)
+  category     PostCategory @default(POLICY_BRIEF)
+  researchArea ResearchArea @default(KOREA_POLICY)
+  stage        DraftStage   @default(IDEA)
+
+  idea         String?  @db.Text   // topic + key points
+  frame        String?  @db.Text   // AI guide outline (markdown)
+  title        String?
+  titleEn      String?
+  excerpt      String?  @db.Text
+  content      String?  @db.Text   // markdown body (KO)
+  contentEn    String?  @db.Text   // markdown body (EN)
+  reviewNotes  Json?               // [{ by, at, strengths[], gaps[], requests[], checklist[] }]
+
+  postId       String?             // linked Post once published
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([stage])
+  @@index([authorId])
+  @@map("research_drafts")
+}
+
 // News Clipping — curated AI & blockchain-infrastructure news feed
 enum NewsClipStatus {
   DRAFT

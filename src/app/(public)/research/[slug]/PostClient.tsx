@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useLang } from '@/lib/i18n';
 import { Icon, Badge } from '@/components/ui';
 import { CATEGORIES, RESEARCH_AREAS } from '@/types';
+import Markdown from '@/components/Markdown';
 
 export default function PostClient({ post }: { post: any }) {
   const { lang, t, bi } = useLang();
@@ -43,9 +44,7 @@ export default function PostClient({ post }: { post: any }) {
 
       {/* Content */}
       {(post.content || post.contentEn) ? (
-        <div className="prose prose-gray max-w-none text-[15px] leading-relaxed">
-          {bi(post.content, post.contentEn)}
-        </div>
+        <Markdown>{bi(post.content, post.contentEn)}</Markdown>
       ) : (
         <div className="py-12 text-center text-gray-400 border border-dashed border-gray-200 rounded-xl">
           {t('본문 콘텐츠가 준비 중입니다.', 'Full content coming soon.')}

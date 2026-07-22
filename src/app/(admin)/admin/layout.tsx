@@ -8,6 +8,7 @@ import { Icon } from '@/components/ui';
 
 const NAV = [
   { href: '/admin', icon: 'home', label: 'Dashboard' },
+  { href: '/admin/write', icon: 'edit', label: 'Write (AI)' },
   { href: '/admin/posts', icon: 'file', label: 'Posts' },
   { href: '/admin/team', icon: 'users', label: 'Team' },
   { href: '/admin/regulations', icon: 'globe', label: 'Regulations' },
