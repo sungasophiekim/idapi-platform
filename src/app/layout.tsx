@@ -3,11 +3,11 @@ import type { Metadata } from 'next';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'IDAPI | 국제디지털자산정책연구소',
-  description: '전문가 집단지성으로 설계하는 디지털 자산 정책의 내일 — International Digital Asset Policy Institute',
+  title: 'iDAPI | 디지털·AI 공공인프라 연구소',
+  description: '디지털·AI 시대의 공공 인프라를 설계하는 정책 싱크탱크 — Institute for Digital & AI Public Infrastructure',
   openGraph: {
-    title: 'IDAPI | International Digital Asset Policy Institute',
-    description: 'Shaping the Future of Digital Asset Policy through Collective Intelligence',
+    title: 'iDAPI | Institute for Digital & AI Public Infrastructure',
+    description: 'Shaping public infrastructure for the digital & AI era',
     locale: 'ko_KR',
     alternateLocale: 'en_US',
   },

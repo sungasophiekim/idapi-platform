@@ -1,7 +1,19 @@
 // src/app/(public)/dashboard/page.tsx
 import { prisma } from '@/lib/db';
 import { calculatePII, generateWeeklySummary } from '@/modules/pii-index';
+import { classifyTheme, THEMES, type ThemeKey } from '@/modules/taxonomy';
 import DashboardClient from './DashboardClient';
+
+// Derived 5-focus-area breakdown — computed at read time from title/tags,
+// so no ResearchArea enum migration is needed.
+function buildThemeBreakdown(regs: { title?: string | null; titleEn?: string | null; tags?: string[] }[]) {
+  const counts = Object.fromEntries((Object.keys(THEMES) as ThemeKey[]).map(k => [k, 0])) as Record<ThemeKey, number>;
+  for (const r of regs) {
+    const text = `${r.title || ''} ${r.titleEn || ''} ${(r.tags || []).join(' ')}`;
+    counts[classifyTheme(text)]++;
+  }
+  return counts;
+}
 
 export const revalidate = 300;
 export const dynamic = 'force-dynamic';
@@ -40,9 +52,11 @@ export default async function DashboardPage() {
     ]);
 
     const [totalLaws, totalArticles, articlesByJur, regsByJur] = archiveStats;
+    const themeBreakdown = buildThemeBreakdown(regulations as any[]);
 
     return (
       <DashboardClient
+        themeBreakdown={themeBreakdown}
         regulations={JSON.parse(JSON.stringify(regulations))}
         trends={JSON.parse(JSON.stringify(trends))}
         briefings={JSON.parse(JSON.stringify(briefings))}
@@ -62,6 +76,7 @@ export default async function DashboardPage() {
     // Fallback: render with empty data
     return (
       <DashboardClient
+        themeBreakdown={buildThemeBreakdown([])}
         regulations={[]}
         trends={[]}
         briefings={[]}

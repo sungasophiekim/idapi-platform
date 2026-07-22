@@ -18,11 +18,11 @@ export default function Header() {
   }, []);
 
   const navItems = [
-    { href: '/about', label: t('About', 'About') },
-    { href: '/dashboard', label: t('대시보드', 'Dashboard') },
-    { href: '/consult', label: t('규제 컨설팅', 'Reg Consulting') },
-    { href: '/analyze', label: t('AI 분석', 'AI Analyzer') },
     { href: '/research', label: t('연구자료', 'Research') },
+    { href: '/insights', label: t('인사이트', 'Insights') },
+    { href: '/dashboard', label: t('정책 레이더', 'Policy Radar') },
+    { href: '/focus-areas', label: t('연구영역', 'Focus Areas') },
+    { href: '/about', label: t('소개', 'About') },
     { href: '/team', label: t('팀 소개', 'Team') },
   ];
 
@@ -33,9 +33,9 @@ export default function Header() {
         <Link href="/" className="flex items-center gap-2.5 group">
           <div className="w-[30px] h-[30px] bg-green-deep rounded-md flex items-center justify-center text-white font-bold text-[11px] tracking-wider">ID</div>
           <div className="leading-tight">
-            <div className="font-bold text-[17px] tracking-tight">IDAPI</div>
+            <div className="font-bold text-[17px] tracking-tight">iDAPI</div>
             <div className="text-[10px] text-gray-400 tracking-wide">
-              {t('국제디지털자산정책연구소', "Int'l Digital Asset Policy Institute")}
+              {t('디지털·AI 공공인프라 연구소', 'Digital & AI Public Infrastructure')}
             </div>
           </div>
         </Link>
@@ -58,8 +58,13 @@ export default function Header() {
             ))}
           </div>
 
+          {/* Subscribe CTA */}
+          <Link href="/insights#subscribe" className="px-3.5 py-1.5 bg-green-deep text-white text-[12px] font-bold rounded-md hover:bg-green-light transition-colors">
+            {t('구독', 'Subscribe')}
+          </Link>
+
           {/* Admin */}
-          <Link href="/admin" className="px-3 py-1.5 bg-green-deep text-white text-[12px] font-bold rounded-md hover:bg-green-light transition-colors">
+          <Link href="/admin" className="text-[12px] font-medium text-gray-400 hover:text-green-deep transition-colors">
             Admin
           </Link>
         </nav>

@@ -75,12 +75,19 @@ export async function GET(req: NextRequest) {
     }
   }
 
-  // 4. Collect international bills
+  // 4. Collect international bills (US + Asia SG/JP/HK)
   try {
     const { collectUSCongressBills } = await import('@/modules/bill-tracker/us-tracker');
     results.usBills = await collectUSCongressBills();
   } catch (e: any) {
     results.usBills = { error: e.message };
+  }
+
+  try {
+    const { collectAllAsiaBills } = await import('@/modules/bill-tracker/asia-tracker');
+    results.asiaBills = await collectAllAsiaBills();
+  } catch (e: any) {
+    results.asiaBills = { error: e.message };
   }
 
   // 5. Notify

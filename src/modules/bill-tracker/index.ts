@@ -3,22 +3,14 @@
 // Source: https://open.assembly.go.kr OpenAPI
 
 import { prisma } from '@/lib/db';
+import { KEYWORDS_KO } from '@/modules/taxonomy';
 
 const ASSEMBLY_API_KEY = process.env.ASSEMBLY_API_KEY || '';
 const ASSEMBLY_BASE = 'https://open.assembly.go.kr/portal/openapi';
 
-// Keywords for digital asset & AI bill filtering
-const TARGET_KEYWORDS = [
-  // Digital assets
-  '가상자산', '디지털자산', '암호화폐', '암호자산', '블록체인',
-  '스테이블코인', '토큰', 'NFT', 'STO', 'ICO', '비트코인',
-  '가상화폐', 'CBDC', '디지털화폐', 'DAO', '디파이', 'DeFi',
-  // AI
-  '인공지능', 'AI', '머신러닝', '딥러닝', '생성형',
-  '알고리즘', '자동화의사결정', 'GPT',
-  // Related
-  'VASP', '거래소', '메타버스',
-];
+// Live KR filter keywords — single source of truth across all 5 focus areas
+// (AI governance, DPI, digital identity, data governance, digital assets).
+const TARGET_KEYWORDS = KEYWORDS_KO;
 
 interface AssemblyBill {
   BILL_ID: string;

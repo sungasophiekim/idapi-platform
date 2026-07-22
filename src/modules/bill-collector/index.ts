@@ -1,7 +1,10 @@
 // src/modules/bill-collector/index.ts
 // Automated bill/regulation collector from public government APIs
 // Targets: Korea National Assembly, SEC, EU EUR-Lex, Singapore MAS
-// Filters for digital asset / crypto / blockchain relevant bills only
+// Filters for digital & AI public infrastructure relevant bills:
+// AI governance, digital public infrastructure, digital identity, data governance, digital assets
+
+import { KEYWORDS_KO, KEYWORDS_EN } from '@/modules/taxonomy';
 
 export interface CollectedBill {
   sourceId: string;
@@ -18,22 +21,10 @@ export interface CollectedBill {
 }
 
 // ─── Keywords that indicate digital asset relevance ───
-const CRYPTO_KEYWORDS_KO = [
-  '가상자산', '디지털자산', '암호화폐', '가상화폐', '블록체인',
-  '토큰증권', '스테이블코인', '디지털화폐', '중앙은행디지털',
-  '코인', '거래소', 'NFT', '분산원장', '디파이', 'DeFi',
-  '특정금융거래', '자금세탁', 'AML', '전자금융',
-  '토큰', '디지털금융', '핀테크', '전자증권',
-];
-
-const CRYPTO_KEYWORDS_EN = [
-  'crypto', 'digital asset', 'virtual asset', 'blockchain',
-  'stablecoin', 'token', 'cryptocurrency', 'CBDC',
-  'decentralized finance', 'defi', 'NFT', 'distributed ledger',
-  'money laundering', 'AML', 'KYC', 'fintech',
-  'securities token', 'tokeniz', 'digital currency',
-  'exchange-traded', 'crypto asset',
-];
+// Shared 5-focus-area keyword banks (single source of truth in taxonomy.ts).
+// Extra AML/KYC terms retained here since SEC/AML filings use them heavily.
+const CRYPTO_KEYWORDS_KO = [...KEYWORDS_KO, '특정금융거래', '자금세탁', 'AML', '전자금융'];
+const CRYPTO_KEYWORDS_EN = [...KEYWORDS_EN, 'money laundering', 'aml', 'kyc', 'exchange-traded'];
 
 function isCryptoRelevant(text: string, lang: 'ko' | 'en'): boolean {
   const lower = text.toLowerCase();

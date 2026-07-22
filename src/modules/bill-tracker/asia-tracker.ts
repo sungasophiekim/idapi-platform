@@ -3,6 +3,7 @@
 // government & regulator sources (MAS, FSA, LegCo, SFC, HKMA).
 
 import { prisma } from '@/lib/db';
+import { KEYWORDS_EN, KEYWORDS_JA } from '@/modules/taxonomy';
 
 // ─── Shared helpers ──────────────────────────────────────────────
 
@@ -138,43 +139,11 @@ async function upsertRegulation(opts: {
 
 // ─── Keywords per jurisdiction ───────────────────────────────────
 
-const SG_KEYWORDS = [
-  'digital payment token',
-  'cryptocurrency',
-  'virtual asset',
-  'stablecoin',
-  'blockchain',
-  'dpt',
-  'artificial intelligence',
-  'digital asset',
-  'token offering',
-];
-
-const JP_KEYWORDS = [
-  '仮想通貨',
-  '暗号資産',
-  'ブロックチェーン',
-  'ステーブルコイン',
-  '人工知能',
-  'ai',
-  'デジタル資産',
-  'トークン',
-  '暗号通貨',
-  'DAO',
-  'NFT',
-];
-
-const HK_KEYWORDS = [
-  'virtual asset',
-  'cryptocurrency',
-  'stablecoin',
-  'vasp',
-  'blockchain',
-  'artificial intelligence',
-  'digital asset',
-  'token',
-  'crypto',
-];
+// Filter-based (fetch page → matchesKeywords), so the full shared banks are
+// safe here — no per-keyword API calls. Local terms kept alongside.
+const SG_KEYWORDS = [...KEYWORDS_EN, 'digital payment token', 'dpt', 'singpass'];
+const JP_KEYWORDS = [...KEYWORDS_JA];
+const HK_KEYWORDS = [...KEYWORDS_EN, 'vasp', 'iamsmart'];
 
 function matchesKeywords(text: string, keywords: string[]): boolean {
   const lower = text.toLowerCase();

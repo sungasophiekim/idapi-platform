@@ -56,9 +56,18 @@ interface Props {
   };
   pii: PIIData | null;
   weeklySummary: WeeklySummaryData | null;
+  themeBreakdown?: Record<string, number>;
 }
 
-export default function DashboardClient({ regulations, trends, briefings, stats, archiveData, pii, weeklySummary }: Props) {
+const FOCUS_AREAS: { key: string; ko: string; en: string }[] = [
+  { key: 'AI_GOVERNANCE', ko: 'AI 거버넌스·규제', en: 'AI Governance' },
+  { key: 'DPI', ko: '디지털 공공인프라', en: 'Digital Public Infra' },
+  { key: 'DIGITAL_IDENTITY', ko: '디지털 신원·신뢰', en: 'Digital Identity' },
+  { key: 'DATA_GOVERNANCE', ko: '데이터 거버넌스', en: 'Data Governance' },
+  { key: 'DIGITAL_ASSETS', ko: '디지털 자산', en: 'Digital Assets' },
+];
+
+export default function DashboardClient({ regulations, trends, briefings, stats, archiveData, pii, weeklySummary, themeBreakdown = {} }: Props) {
   const { lang, t, bi } = useLang();
   const [jFilter, setJFilter] = useState('all');
   const [viewMode, setViewMode] = useState<'kanban' | 'list'>('kanban');
@@ -193,9 +202,9 @@ export default function DashboardClient({ regulations, trends, briefings, stats,
       <div className="bg-gradient-to-br from-green-deep via-green-deep/90 to-green-deep/80 text-white rounded-2xl p-8 md:p-10 mb-6">
         <div className="flex items-start justify-between flex-wrap gap-6">
           <div className="max-w-2xl">
-            <div className="text-[11px] font-bold tracking-widest uppercase text-white/70 mb-3">{t('IDAPI 정책 인텔리전스', 'IDAPI Policy Intelligence')}</div>
+            <div className="text-[11px] font-bold tracking-widest uppercase text-white/70 mb-3">{t('iDAPI 정책 인텔리전스', 'iDAPI Policy Intelligence')}</div>
             <h1 className="text-3xl md:text-[40px] font-bold tracking-tight leading-tight mb-3">
-              {t('글로벌 디지털자산 정책 레이더', 'Global Digital Asset Policy Radar')}
+              {t('글로벌 디지털·AI 공공 인프라 정책 레이더', 'Global Digital & AI Public Infrastructure Policy Radar')}
             </h1>
             <p className="text-white/70 text-[14px] leading-relaxed">
               {t(
@@ -244,7 +253,7 @@ export default function DashboardClient({ regulations, trends, briefings, stats,
         <div className="lg:col-span-2 bg-gradient-to-br from-green-50 to-white border border-green-deep/20 rounded-xl p-6">
           <div className="text-[11px] font-bold tracking-widest uppercase text-green-deep mb-2">{t('주간 뉴스레터', 'Weekly Newsletter')}</div>
           <h3 className="text-[16px] font-bold mb-2">{t('매주 정책 동향을 받아보세요', 'Get weekly policy updates')}</h3>
-          <p className="text-[12px] text-gray-500 mb-4 leading-relaxed">{t('매주 월요일, 디지털자산/AI 정책 핵심 요약을 이메일로 전달합니다.', 'Every Monday — digital asset & AI policy digest delivered to your inbox.')}</p>
+          <p className="text-[12px] text-gray-500 mb-4 leading-relaxed">{t('매주 월요일, 디지털·AI 공공 인프라 정책 핵심 요약을 이메일로 전달합니다.', 'Every Monday — digital & AI public infrastructure policy digest delivered to your inbox.')}</p>
           {nlStatus === 'done' ? (
             <div className="text-[14px] text-green-700 font-semibold flex items-center gap-2">✓ {t('구독 완료!', 'Subscribed!')}</div>
           ) : (
@@ -360,6 +369,34 @@ export default function DashboardClient({ regulations, trends, briefings, stats,
                 </button>
               );
             })}
+          </div>
+        </div>
+
+        {/* Focus Area Breakdown (derived from title/tags — 5 themes) */}
+        <div className="bg-white border border-[#e8e8e6] rounded-2xl p-6">
+          <h3 className="text-[15px] font-bold mb-1">{t('연구영역별 분포', 'By Focus Area')}</h3>
+          <p className="text-[12px] text-gray-400 mb-4">{t('추적 중인 법안·규제의 테마 분류', 'Themes across tracked bills & regulations')}</p>
+          <div className="space-y-3">
+            {(() => {
+              const max = Math.max(1, ...FOCUS_AREAS.map(a => themeBreakdown[a.key] || 0));
+              return FOCUS_AREAS.map(a => {
+                const count = themeBreakdown[a.key] || 0;
+                const pct = (count / max) * 100;
+                return (
+                  <div key={a.key} className="flex items-center gap-3">
+                    <div className="flex-1">
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-[12px] font-semibold text-gray-600">{lang === 'en' ? a.en : a.ko}</span>
+                        <span className="text-[11px] text-gray-400">{count}{t('건', '')}</span>
+                      </div>
+                      <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+                        <div className="h-full rounded-full bg-green-deep/60 transition-all" style={{ width: `${pct}%` }} />
+                      </div>
+                    </div>
+                  </div>
+                );
+              });
+            })()}
           </div>
         </div>
       </div>
@@ -674,7 +711,7 @@ export default function DashboardClient({ regulations, trends, briefings, stats,
                     {feedbackSubmitting ? '...' : t('제출', 'Submit')}
                   </button>
                 </div>
-                <p className="text-[11px] text-gray-400 mt-2">{t('제출된 의견은 IDAPI 정책 제언 보고서에 익명으로 반영됩니다.', 'Feedback is anonymously included in IDAPI policy recommendation reports.')}</p>
+                <p className="text-[11px] text-gray-400 mt-2">{t('제출된 의견은 iDAPI 정책 제언 보고서에 익명으로 반영됩니다.', 'Feedback is anonymously included in iDAPI policy recommendation reports.')}</p>
               </div>
             )}
           </div>

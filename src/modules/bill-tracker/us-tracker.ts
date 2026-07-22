@@ -8,9 +8,17 @@ const CONGRESS_API_KEY = process.env.CONGRESS_API_KEY || '';
 const CONGRESS_API_BASE = 'https://api.congress.gov/v3';
 
 const SEARCH_KEYWORDS = [
+  // Digital assets & tokenized infra
   'cryptocurrency', 'digital asset', 'blockchain', 'stablecoin',
   'virtual currency', 'crypto', 'token', 'bitcoin',
-  'artificial intelligence', 'AI regulation',
+  // AI governance & regulation
+  'artificial intelligence', 'AI regulation', 'algorithmic accountability', 'automated decision',
+  // Digital public infrastructure
+  'digital public infrastructure', 'digital government', 'interoperability',
+  // Digital identity & trust
+  'digital identity', 'digital ID',
+  // Data governance & privacy
+  'data privacy', 'data protection', 'consumer data',
 ];
 
 // Target congresses: 118th (2023-2025) and 119th (2025-2027)
