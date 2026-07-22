@@ -259,6 +259,64 @@ export const RSS_SOURCES: RssSource[] = [
     jurisdiction: 'US', type: 'research', weight: 1.5, lang: 'en',
     tags: ['bitcoin', 'policy-research'], active: true,
   },
+
+  // ═══ NEWS-CLIP MEDIA — AI & digital-asset infrastructure ═══
+  {
+    id: 'clip-coindesk',
+    name: 'CoinDesk',
+    nameKo: 'CoinDesk',
+    url: 'https://www.coindesk.com/arc/outboundfeeds/rss/',
+    jurisdiction: 'MEDIA', type: 'media', weight: 1.5, lang: 'en',
+    tags: ['crypto-news', 'rwa', 'stablecoin'], active: true,
+  },
+  {
+    id: 'clip-decrypt',
+    name: 'Decrypt',
+    nameKo: 'Decrypt',
+    url: 'https://decrypt.co/feed',
+    jurisdiction: 'MEDIA', type: 'media', weight: 1.2, lang: 'en',
+    tags: ['crypto-news', 'ai'], active: true,
+  },
+  {
+    id: 'clip-dlnews',
+    name: 'DL News',
+    nameKo: 'DL News',
+    url: 'https://www.dlnews.com/arc/outboundfeeds/rss/',
+    jurisdiction: 'MEDIA', type: 'media', weight: 1.2, lang: 'en',
+    tags: ['crypto-news', 'defi', 'rwa'], active: true,
+  },
+  {
+    id: 'clip-ledgerinsights',
+    name: 'Ledger Insights',
+    nameKo: 'Ledger Insights',
+    url: 'https://www.ledgerinsights.com/feed/',
+    jurisdiction: 'MEDIA', type: 'media', weight: 1.4, lang: 'en',
+    tags: ['tokenization', 'rwa', 'enterprise'], active: true,
+  },
+  {
+    id: 'clip-thedefiant',
+    name: 'The Defiant',
+    nameKo: 'The Defiant',
+    url: 'https://thedefiant.io/api/feed',
+    jurisdiction: 'MEDIA', type: 'media', weight: 1.0, lang: 'en',
+    tags: ['defi', 'onchain-finance'], active: true,
+  },
+  {
+    id: 'clip-venturebeat-ai',
+    name: 'VentureBeat AI',
+    nameKo: 'VentureBeat AI',
+    url: 'https://venturebeat.com/category/ai/feed/',
+    jurisdiction: 'MEDIA', type: 'media', weight: 1.2, lang: 'en',
+    tags: ['ai', 'ai-infra', 'ai-agents'], active: true,
+  },
+  {
+    id: 'clip-mit-tech-review',
+    name: 'MIT Technology Review',
+    nameKo: 'MIT Technology Review',
+    url: 'https://www.technologyreview.com/feed/',
+    jurisdiction: 'MEDIA', type: 'media', weight: 1.5, lang: 'en',
+    tags: ['ai', 'sovereign-ai', 'ai-policy'], active: true,
+  },
 ];
 
 // Helper: get active sources only

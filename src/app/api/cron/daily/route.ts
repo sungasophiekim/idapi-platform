@@ -46,6 +46,14 @@ export async function GET(req: NextRequest) {
     }
   }
 
+  // 3. Collect news clips (DRAFT — curated in admin before publishing)
+  try {
+    const { collectNewsClips } = await import('@/modules/news-clip');
+    results.newsClips = await collectNewsClips();
+  } catch (e: any) {
+    results.newsClips = { error: e.message };
+  }
+
   return NextResponse.json({
     timestamp: new Date().toISOString(),
     ...results,

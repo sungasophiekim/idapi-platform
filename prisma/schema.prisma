@@ -366,6 +366,31 @@ model NewsletterSubscriber {
   @@map("newsletter_subscribers")
 }
 
+// News Clipping — curated AI & blockchain-infrastructure news feed
+enum NewsClipStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+model NewsClip {
+  id          String         @id @default(cuid())
+  title       String
+  url         String         @unique   // dedup key
+  source      String                    // outlet name
+  theme       String                    // one of 7 watch-theme keys
+  excerpt     String?        @db.Text    // RSS description snippet
+  lang        String         @default("en")
+  publishedAt DateTime
+  status      NewsClipStatus @default(DRAFT)
+  createdAt   DateTime       @default(now())
+
+  @@index([theme])
+  @@index([status])
+  @@index([publishedAt])
+  @@map("news_clips")
+}
+
 // Phase 3: Community & Policy Voice
 // model Survey            { ... }
 // model SurveyResponse    { ... }

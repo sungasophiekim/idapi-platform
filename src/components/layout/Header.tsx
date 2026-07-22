@@ -23,7 +23,7 @@ export default function Header() {
 
   const navItems: NavItem[] = [
     { href: '/research', label: t('연구자료', 'Research') },
-    { href: '/insights', label: t('인사이트', 'Insights') },
+    { href: '/insights', label: t('뉴스클리핑', 'News') },
     { href: '/dashboard', label: t('정책 레이더', 'Policy Radar') },
     {
       label: t('소개', 'About'),
