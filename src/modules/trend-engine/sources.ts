@@ -317,6 +317,44 @@ export const RSS_SOURCES: RssSource[] = [
     jurisdiction: 'MEDIA', type: 'media', weight: 1.5, lang: 'en',
     tags: ['ai', 'sovereign-ai', 'ai-policy'], active: true,
   },
+
+  // ═══ GOOGLE NEWS — targeted per-theme coverage (reliable, fills gaps) ═══
+  // Each query is theme-scoped; the isRelevant/classifyClip filter keeps precision.
+  {
+    id: 'gn-rwa', name: 'Google News · RWA', nameKo: '구글뉴스 · RWA',
+    url: 'https://news.google.com/rss/search?q=%22real+world+asset%22+OR+%22asset+tokenization%22&hl=en-US&gl=US&ceid=US:en',
+    jurisdiction: 'MEDIA', type: 'media', weight: 1.0, lang: 'en', tags: ['rwa'], active: true,
+  },
+  {
+    id: 'gn-stablecoin', name: 'Google News · Stablecoin', nameKo: '구글뉴스 · 스테이블코인',
+    url: 'https://news.google.com/rss/search?q=stablecoin+OR+%22tokenized+deposit%22&hl=en-US&gl=US&ceid=US:en',
+    jurisdiction: 'MEDIA', type: 'media', weight: 1.0, lang: 'en', tags: ['stablecoin'], active: true,
+  },
+  {
+    id: 'gn-ai-agent-pay', name: 'Google News · AI Agent Payments', nameKo: '구글뉴스 · AI 에이전트 결제',
+    url: 'https://news.google.com/rss/search?q=%22AI+agent%22+payment+OR+%22agentic+commerce%22+OR+x402&hl=en-US&gl=US&ceid=US:en',
+    jurisdiction: 'MEDIA', type: 'media', weight: 1.0, lang: 'en', tags: ['ai-agent-payment'], active: true,
+  },
+  {
+    id: 'gn-ai-fin-infra', name: 'Google News · AI Finance', nameKo: '구글뉴스 · AI 금융',
+    url: 'https://news.google.com/rss/search?q=%22AI%22+%22financial+infrastructure%22+OR+%22AI+in+finance%22&hl=en-US&gl=US&ceid=US:en',
+    jurisdiction: 'MEDIA', type: 'media', weight: 1.0, lang: 'en', tags: ['ai-fin-infra'], active: true,
+  },
+  {
+    id: 'gn-sovereign-ai', name: 'Google News · Sovereign AI', nameKo: '구글뉴스 · 소버린 AI',
+    url: 'https://news.google.com/rss/search?q=%22sovereign+AI%22+OR+%22AI+sovereignty%22&hl=en-US&gl=US&ceid=US:en',
+    jurisdiction: 'MEDIA', type: 'media', weight: 1.0, lang: 'en', tags: ['sovereign-ai'], active: true,
+  },
+  {
+    id: 'gn-ai-policy', name: 'Google News · AI Policy', nameKo: '구글뉴스 · AI 정책',
+    url: 'https://news.google.com/rss/search?q=%22AI+policy%22+government+OR+%22AI+regulation%22&hl=en-US&gl=US&ceid=US:en',
+    jurisdiction: 'MEDIA', type: 'media', weight: 1.0, lang: 'en', tags: ['ai-public-policy'], active: true,
+  },
+  {
+    id: 'gn-ai-kr', name: 'Google News · AI 정책 (KR)', nameKo: '구글뉴스 · AI 정책(한국)',
+    url: 'https://news.google.com/rss/search?q=AI+정책+OR+인공지능+공공+OR+AI+결제&hl=ko&gl=KR&ceid=KR:ko',
+    jurisdiction: 'MEDIA', type: 'media', weight: 1.0, lang: 'ko', tags: ['ai-public-policy'], active: true,
+  },
 ];
 
 // Helper: get active sources only

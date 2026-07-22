@@ -28,7 +28,7 @@ export default function NewsTicker() {
       {/* Static left cap */}
       <div className="hidden sm:flex items-center gap-1.5 px-3.5 bg-green-light/90 shrink-0 border-r border-white/10">
         <span className="w-1.5 h-1.5 rounded-full bg-red-400 animate-pulse" />
-        <span className="text-[11px] font-bold tracking-wide">{t('뉴스', 'NEWS')}</span>
+        <span className="text-[11px] font-bold tracking-wide whitespace-nowrap">{t('오늘의 Top News', "Today's Top News")}</span>
       </div>
 
       {/* Marquee */}
