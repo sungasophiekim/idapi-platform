@@ -20,3 +20,16 @@ body {
 /* Smooth page transitions */
 .page-enter { opacity: 0; transform: translateY(12px); }
 .page-enter-active { opacity: 1; transform: translateY(0); transition: all 0.3s ease; }
+
+/* News ticker marquee */
+@keyframes ticker-scroll {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+.ticker-track {
+  display: inline-flex;
+  white-space: nowrap;
+  animation: ticker-scroll 60s linear infinite;
+  will-change: transform;
+}
+.ticker-track:hover { animation-play-state: paused; }

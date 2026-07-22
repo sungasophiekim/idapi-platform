@@ -41,7 +41,7 @@ export default function Header() {
   );
 
   return (
-    <header className={`fixed top-0 left-0 right-0 z-50 bg-white/[0.94] backdrop-blur-xl border-b border-border transition-shadow duration-300 ${scrolled ? 'shadow-sm' : ''}`}>
+    <header className={`fixed top-9 left-0 right-0 z-50 bg-white/[0.94] backdrop-blur-xl border-b border-border transition-shadow duration-300 ${scrolled ? 'shadow-sm' : ''}`}>
       <div className="max-w-[1140px] mx-auto px-6 flex items-center justify-between h-16">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2.5 group">
