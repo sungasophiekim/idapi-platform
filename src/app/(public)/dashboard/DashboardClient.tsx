@@ -208,7 +208,7 @@ export default function DashboardClient({ regulations, trends, briefings, stats,
             </h1>
             <p className="text-white/70 text-[14px] leading-relaxed">
               {t(
-                `${archiveData.totalArticles.toLocaleString()}개 조문 · ${archiveData.totalLaws}개 법률 · ${stats.total}개 법안 — 6개국 실시간 추적`,
+                `${archiveData.totalArticles.toLocaleString()}개 조문 · ${archiveData.totalLaws}개 법률 · ${stats.total}개 법안 — 6개 관할권 실시간 추적`,
                 `${archiveData.totalArticles.toLocaleString()} articles · ${archiveData.totalLaws} laws · ${stats.total} bills — 6 jurisdictions tracked`
               )}
             </p>

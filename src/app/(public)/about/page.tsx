@@ -25,7 +25,7 @@ export default function AboutPage() {
       <div className="text-[11px] font-bold tracking-widest uppercase text-green-deep mb-3">About iDAPI</div>
       <h1 className="text-[28px] font-bold mb-2">iDAPI: Institute for Digital & AI Public Infrastructure</h1>
       <p className="text-lg text-gray-500 italic mb-8">
-        {t('전문가 집단지성으로 설계하는 디지털·AI 공공 인프라의 내일', 'Shaping the Future of Digital & AI Public Infrastructure through Collective Intelligence')}
+        {t('디지털·AI 시대의 공공 인프라를 설계합니다', 'Shaping public infrastructure for the digital & AI era')}
       </p>
       <p className="text-[15px] text-gray-500 leading-relaxed mb-8">
         {t(
