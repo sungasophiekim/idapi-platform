@@ -46,13 +46,7 @@ export async function GET(req: NextRequest) {
     }
   }
 
-  // 3. Collect news clips (DRAFT — curated in admin before publishing)
-  try {
-    const { collectNewsClips } = await import('@/modules/news-clip');
-    results.newsClips = await collectNewsClips();
-  } catch (e: any) {
-    results.newsClips = { error: e.message };
-  }
+  // News clips are collected by the dedicated /api/cron/news job (every 6h).
 
   return NextResponse.json({
     timestamp: new Date().toISOString(),
