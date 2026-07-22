@@ -68,9 +68,11 @@ async function fetchFeed(source: RssSource, maxArticles = 20): Promise<Collected
 
     const res = await fetch(source.url, {
       signal: controller.signal,
+      redirect: 'follow',
       headers: {
-        'User-Agent': 'IDAPI-PolicyBot/1.0 (+https://idapi.kr)',
-        'Accept': 'application/rss+xml, application/xml, text/xml',
+        // Real browser UA — many gov/regulator feeds 403/406 a bot UA.
+        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36',
+        'Accept': 'application/rss+xml, application/atom+xml, application/xml, text/xml, text/html, */*',
       },
     });
     clearTimeout(timeout);

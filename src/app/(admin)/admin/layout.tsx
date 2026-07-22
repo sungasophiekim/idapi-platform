@@ -15,6 +15,7 @@ const NAV = [
   { href: '/admin/bills', icon: 'shield', label: 'Bill Collector' },
   { href: '/admin/trends', icon: 'search', label: 'Trends' },
   { href: '/admin/news', icon: 'globe', label: 'News Clips' },
+  { href: '/admin/sources', icon: 'search', label: 'Source Health' },
   { href: '/admin/briefings', icon: 'file', label: 'Briefings' },
   { href: '/admin/consult', icon: 'shield', label: 'Consulting' },
   { href: '/admin/archive', icon: 'file', label: 'Law Archive' },
