@@ -31,9 +31,10 @@ export default function NewsTicker() {
         <span className="text-[11px] font-bold tracking-wide whitespace-nowrap">{t('오늘의 Top News', "Today's Top News")}</span>
       </div>
 
-      {/* Marquee */}
+      {/* Marquee — duration scales with clip count so visual speed stays
+          constant regardless of how many clips are published (~7s per clip). */}
       <div className="flex-1 overflow-hidden relative flex items-center">
-        <div className="ticker-track">
+        <div className="ticker-track" style={{ animationDuration: `${Math.max(40, clips.length * 7)}s` }}>
           {items.map((c, i) => {
             const kind = macro(c.theme);
             return (
