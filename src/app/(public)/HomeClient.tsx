@@ -23,51 +23,51 @@ export default function HomeClient({ posts }: { posts: any[] }) {
 
   return (
     <>
-      {/* ─── HERO — latest research ─── */}
-      <section className="pt-32 pb-14">
-        <div className="max-w-[1140px] mx-auto px-6">
-          <div className="flex items-baseline justify-between mb-7">
-            <div className="eyebrow text-green-deep/70">{t('최신 연구', 'Latest Research')}</div>
-            <Link href="/research" className="font-mono text-[11px] tracking-[0.06em] text-ink-faint hover:text-green-deep">{t('전체 보기 →', 'All →')}</Link>
+      {/* ─── HERO BANNER — latest research (issue-paper style) ─── */}
+      <section className="bg-green-deep text-white">
+        <div className="max-w-[1140px] mx-auto px-6 pt-28 pb-16 md:pt-32 md:pb-20">
+          <div className="flex items-baseline justify-between mb-8">
+            <span className="eyebrow text-white/55">{t('최신 연구', 'Latest Research')}</span>
+            <Link href="/research" className="font-mono text-[11px] tracking-[0.06em] text-white/50 hover:text-white">{t('전체 보기 →', 'All →')}</Link>
           </div>
 
           {posts.length > 0 ? (
             <>
-              {/* Featured */}
-              <Link href={`/research/${posts[0].slug}`} className="block group border-b border-border pb-9 mb-9">
-                <div className="flex items-center gap-2.5 mb-3">
-                  <span className="font-mono text-[10px] tracking-[0.1em] uppercase text-green-deep">{CATEGORIES[posts[0].category as keyof typeof CATEGORIES]?.[lang] || posts[0].category}</span>
-                  <span className="text-ink-faint text-[11px]">{RESEARCH_AREAS[posts[0].researchArea as keyof typeof RESEARCH_AREAS]?.[lang]}</span>
-                  <span className="text-ink-faint text-[11px] ml-auto font-mono">{posts[0].publishedAt?.slice(0, 10)}</span>
+              {/* Featured banner */}
+              <Link href={`/research/${posts[0].slug}`} className="block group max-w-[860px]">
+                <div className="flex items-center gap-2.5 mb-4">
+                  <span className="font-mono text-[10px] tracking-[0.11em] uppercase text-[#f0c059]">{CATEGORIES[posts[0].category as keyof typeof CATEGORIES]?.[lang] || posts[0].category}</span>
+                  <span className="text-white/45 text-[11px]">{RESEARCH_AREAS[posts[0].researchArea as keyof typeof RESEARCH_AREAS]?.[lang]}</span>
+                  <span className="text-white/40 text-[11px] font-mono">· {posts[0].publishedAt?.slice(0, 10)}</span>
                 </div>
-                <h1 className={`text-3xl md:text-[38px] font-bold leading-[1.22] tracking-tight max-w-[900px] group-hover:text-green-deep transition-colors ${lang === 'en' ? 'font-serif font-medium' : ''}`}>
+                <h1 className={`text-[30px] md:text-[46px] font-bold leading-[1.18] tracking-tight group-hover:text-white/90 transition-colors ${lang === 'en' ? 'font-serif font-medium' : ''}`}>
                   {bi(posts[0].title, posts[0].titleEn)}
                 </h1>
                 {(posts[0].excerpt || posts[0].excerptEn) && (
-                  <p className="mt-4 text-[16px] text-ink-soft leading-relaxed max-w-[680px]">{bi(posts[0].excerpt, posts[0].excerptEn)}</p>
+                  <p className="mt-5 text-[16px] md:text-[17px] text-white/65 leading-relaxed max-w-[680px]">{bi(posts[0].excerpt, posts[0].excerptEn)}</p>
                 )}
+                <span className="inline-flex items-center gap-1.5 mt-6 text-[13px] font-semibold text-white group-hover:gap-3 transition-all">
+                  {t('전문 읽기', 'Read')} <Icon name="arrow" size={15} />
+                </span>
               </Link>
 
-              {/* Next items */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-6">
-                {posts.slice(1, 5).map((p: any) => (
-                  <Link key={p.id} href={`/research/${p.slug}`} className="block group border-b border-gray-100 pb-5">
-                    <div className="flex items-center gap-2 mb-1.5">
-                      <span className="font-mono text-[9.5px] tracking-[0.1em] uppercase text-green-deep/80">{CATEGORIES[p.category as keyof typeof CATEGORIES]?.[lang] || p.category}</span>
-                      <span className="text-ink-faint text-[10.5px] ml-auto font-mono">{p.publishedAt?.slice(0, 10)}</span>
-                    </div>
-                    <h3 className={`text-[16.5px] font-semibold leading-snug tracking-tight group-hover:text-green-deep transition-colors ${lang === 'en' ? 'font-serif font-medium text-[18px]' : ''}`}>
-                      {bi(p.title, p.titleEn)}
-                    </h3>
-                  </Link>
-                ))}
-              </div>
+              {/* Recent strip */}
+              {posts.length > 1 && (
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-x-8 gap-y-5 mt-14 pt-8 border-t border-white/12">
+                  {posts.slice(1, 4).map((p: any) => (
+                    <Link key={p.id} href={`/research/${p.slug}`} className="block group">
+                      <div className="flex items-center gap-2 mb-1.5">
+                        <span className="font-mono text-[9px] tracking-[0.1em] uppercase text-[#f0c059]/85">{CATEGORIES[p.category as keyof typeof CATEGORIES]?.[lang] || p.category}</span>
+                        <span className="text-white/35 text-[10px] ml-auto font-mono">{p.publishedAt?.slice(0, 10)}</span>
+                      </div>
+                      <h3 className="text-[14.5px] font-semibold leading-snug text-white/85 group-hover:text-white transition-colors">{bi(p.title, p.titleEn)}</h3>
+                    </Link>
+                  ))}
+                </div>
+              )}
             </>
           ) : (
-            <div className="py-16 text-center border border-dashed border-border rounded-xl text-ink-faint">
-              {t('연구자료가 곧 게시됩니다.', 'Research is coming soon.')}
-              <div className="mt-4"><Link href="/research"><Btn variant="outline">{t('연구자료', 'Research')}</Btn></Link></div>
-            </div>
+            <div className="py-10 text-white/60">{t('연구자료가 곧 게시됩니다.', 'Research is coming soon.')}</div>
           )}
         </div>
       </section>
