@@ -33,22 +33,28 @@ export default function HomeClient({ posts }: { posts: any[] }) {
 
           {posts.length > 0 ? (
             <>
-              {/* Featured banner */}
-              <Link href={`/research/${posts[0].slug}`} className="block group max-w-[860px]">
-                <div className="flex items-center gap-2.5 mb-4">
-                  <span className="font-mono text-[10px] tracking-[0.11em] uppercase text-[#f0c059]">{CATEGORIES[posts[0].category as keyof typeof CATEGORIES]?.[lang] || posts[0].category}</span>
-                  <span className="text-white/45 text-[11px]">{RESEARCH_AREAS[posts[0].researchArea as keyof typeof RESEARCH_AREAS]?.[lang]}</span>
-                  <span className="text-white/40 text-[11px] font-mono">· {posts[0].publishedAt?.slice(0, 10)}</span>
+              {/* Featured cover */}
+              <Link href={`/research/${posts[0].slug}`} className="block group max-w-[920px] py-6 md:py-10">
+                <div className="flex items-center gap-3 mb-6 md:mb-7">
+                  <span className="font-mono text-[10px] tracking-[0.13em] uppercase bg-white/10 border border-white/15 text-white px-2.5 py-1 rounded">
+                    {CATEGORIES[posts[0].category as keyof typeof CATEGORIES]?.[lang] || posts[0].category}
+                  </span>
+                  <span className="font-mono text-[10.5px] tracking-[0.06em] text-white/45">
+                    {RESEARCH_AREAS[posts[0].researchArea as keyof typeof RESEARCH_AREAS]?.[lang]} · {posts[0].publishedAt?.slice(0, 10)}
+                  </span>
                 </div>
-                <h1 className={`text-[30px] md:text-[46px] font-bold leading-[1.18] tracking-tight group-hover:text-white/90 transition-colors ${lang === 'en' ? 'font-serif font-medium' : ''}`}>
+                <h1 className={`text-[32px] md:text-[54px] font-bold leading-[1.12] tracking-[-0.03em] group-hover:text-white/90 transition-colors ${lang === 'en' ? 'font-serif font-medium leading-[1.08]' : ''}`}>
                   {bi(posts[0].title, posts[0].titleEn)}
                 </h1>
                 {(posts[0].excerpt || posts[0].excerptEn) && (
-                  <p className="mt-5 text-[16px] md:text-[17px] text-white/65 leading-relaxed max-w-[680px]">{bi(posts[0].excerpt, posts[0].excerptEn)}</p>
+                  <p className="mt-6 md:mt-7 text-[17px] md:text-[18px] text-white/65 leading-[1.7] max-w-[66ch]">{bi(posts[0].excerpt, posts[0].excerptEn)}</p>
                 )}
-                <span className="inline-flex items-center gap-1.5 mt-6 text-[13px] font-semibold text-white group-hover:gap-3 transition-all">
-                  {t('전문 읽기', 'Read')} <Icon name="arrow" size={15} />
-                </span>
+                <div className="mt-9 md:mt-11 pt-5 border-t border-white/15 flex flex-wrap items-center justify-between gap-3 font-mono text-[11px] tracking-[0.04em] text-white/45">
+                  <span>{t('발행 IDAPI Research', 'Published by IDAPI Research')}</span>
+                  <span className="inline-flex items-center gap-1.5 text-white/75 group-hover:gap-3 transition-all">
+                    {t('전문 읽기', 'Read the paper')} <Icon name="arrow" size={13} />
+                  </span>
+                </div>
               </Link>
 
               {/* Recent strip */}
