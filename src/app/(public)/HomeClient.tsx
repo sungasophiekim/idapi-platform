@@ -23,27 +23,52 @@ export default function HomeClient({ posts }: { posts: any[] }) {
 
   return (
     <>
-      {/* ─── HERO ─── */}
-      <section className="pt-36 pb-20 text-center relative">
+      {/* ─── HERO — latest research ─── */}
+      <section className="pt-32 pb-14">
         <div className="max-w-[1140px] mx-auto px-6">
-          <div className="inline-flex items-center gap-2 text-[11px] font-bold text-green-deep tracking-widest uppercase mb-5">
-            <span className="w-5 h-px bg-green-deep/40" />IDAPI<span className="w-5 h-px bg-green-deep/40" />
+          <div className="flex items-baseline justify-between mb-7">
+            <div className="eyebrow text-green-deep/70">{t('최신 연구', 'Latest Research')}</div>
+            <Link href="/research" className="font-mono text-[11px] tracking-[0.06em] text-ink-faint hover:text-green-deep">{t('전체 보기 →', 'All →')}</Link>
           </div>
-          <h1 className="text-3xl md:text-[42px] font-bold leading-[1.35] mb-6 tracking-tight">
-            {t('디지털·AI 시대의', 'Shaping policy infrastructure')}
-            <br />
-            {t('정책 인프라를 설계합니다', 'for the digital and AI era')}
-          </h1>
-          <p className="text-[17px] text-gray-500 max-w-[620px] mx-auto mb-9 leading-relaxed">
-            {t(
-              '디지털·AI 정책인프라 연구소(IDAPI)는 AI 거버넌스, 디지털 공공인프라, 신원·데이터·디지털 자산 정책을 연구하는 비영리·비당파 정책 싱크탱크입니다.',
-              'IDAPI is a non-profit, non-partisan policy think tank researching AI governance, digital public infrastructure, and identity, data, and digital asset policy.'
-            )}
-          </p>
-          <div className="flex gap-3 justify-center flex-wrap">
-            <Link href="/research"><Btn>{t('연구자료 보기', 'View Research')} <Icon name="arrow" size={16} /></Btn></Link>
-            <Link href="/focus-areas"><Btn variant="outline">{t('연구영역', 'Focus Areas')}</Btn></Link>
-          </div>
+
+          {posts.length > 0 ? (
+            <>
+              {/* Featured */}
+              <Link href={`/research/${posts[0].slug}`} className="block group border-b border-border pb-9 mb-9">
+                <div className="flex items-center gap-2.5 mb-3">
+                  <span className="font-mono text-[10px] tracking-[0.1em] uppercase text-green-deep">{CATEGORIES[posts[0].category as keyof typeof CATEGORIES]?.[lang] || posts[0].category}</span>
+                  <span className="text-ink-faint text-[11px]">{RESEARCH_AREAS[posts[0].researchArea as keyof typeof RESEARCH_AREAS]?.[lang]}</span>
+                  <span className="text-ink-faint text-[11px] ml-auto font-mono">{posts[0].publishedAt?.slice(0, 10)}</span>
+                </div>
+                <h1 className={`text-3xl md:text-[38px] font-bold leading-[1.22] tracking-tight max-w-[900px] group-hover:text-green-deep transition-colors ${lang === 'en' ? 'font-serif font-medium' : ''}`}>
+                  {bi(posts[0].title, posts[0].titleEn)}
+                </h1>
+                {(posts[0].excerpt || posts[0].excerptEn) && (
+                  <p className="mt-4 text-[16px] text-ink-soft leading-relaxed max-w-[680px]">{bi(posts[0].excerpt, posts[0].excerptEn)}</p>
+                )}
+              </Link>
+
+              {/* Next items */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-6">
+                {posts.slice(1, 5).map((p: any) => (
+                  <Link key={p.id} href={`/research/${p.slug}`} className="block group border-b border-gray-100 pb-5">
+                    <div className="flex items-center gap-2 mb-1.5">
+                      <span className="font-mono text-[9.5px] tracking-[0.1em] uppercase text-green-deep/80">{CATEGORIES[p.category as keyof typeof CATEGORIES]?.[lang] || p.category}</span>
+                      <span className="text-ink-faint text-[10.5px] ml-auto font-mono">{p.publishedAt?.slice(0, 10)}</span>
+                    </div>
+                    <h3 className={`text-[16.5px] font-semibold leading-snug tracking-tight group-hover:text-green-deep transition-colors ${lang === 'en' ? 'font-serif font-medium text-[18px]' : ''}`}>
+                      {bi(p.title, p.titleEn)}
+                    </h3>
+                  </Link>
+                ))}
+              </div>
+            </>
+          ) : (
+            <div className="py-16 text-center border border-dashed border-border rounded-xl text-ink-faint">
+              {t('연구자료가 곧 게시됩니다.', 'Research is coming soon.')}
+              <div className="mt-4"><Link href="/research"><Btn variant="outline">{t('연구자료', 'Research')}</Btn></Link></div>
+            </div>
+          )}
         </div>
       </section>
 

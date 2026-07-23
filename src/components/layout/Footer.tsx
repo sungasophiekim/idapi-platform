@@ -18,9 +18,6 @@ export default function Footer() {
               <Logo size={26} onDark />
               <span className="font-bold text-[16px]">IDAPI</span>
             </div>
-            <p className="text-[13px] text-white/50 leading-relaxed max-w-[260px]">
-              {t('디지털·AI 시대의 정책 인프라를 설계하는 정책 싱크탱크', 'Institute for Digital and AI Policy Infrastructure')}
-            </p>
           </div>
 
           {/* Research */}
