@@ -234,7 +234,7 @@ Aim for 3-5 immediate actions and 2-4 timeline warnings. Each should be one conc
         'anthropic-version': '2023-06-01',
       },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',  // Use Sonnet for better advisory quality
+        model: 'claude-sonnet-5',  // Use Sonnet for better advisory quality
         max_tokens: 3000,
         system: systemPrompt,
         messages: [{ role: 'user', content: context }],

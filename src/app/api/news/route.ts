@@ -10,7 +10,7 @@ export async function GET() {
       where: { status: 'PUBLISHED' },
       orderBy: { publishedAt: 'desc' },
       take: 40,
-      select: { id: true, title: true, url: true, source: true, theme: true },
+      select: { id: true, title: true, titleKo: true, titleEn: true, url: true, source: true, theme: true },
     })
     .catch(() => []);
   return NextResponse.json({ clips });

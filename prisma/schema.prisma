@@ -412,7 +412,9 @@ enum NewsClipStatus {
 
 model NewsClip {
   id          String         @id @default(cuid())
-  title       String
+  title       String                    // original headline (source language)
+  titleKo     String?                    // KO headline (original or translated)
+  titleEn     String?                    // EN headline (original or translated)
   url         String         @unique   // dedup key
   source      String                    // outlet name
   theme       String                    // one of 7 watch-theme keys

@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useLang } from '@/lib/i18n';
 
-interface Clip { id: string; title: string; url: string; source: string; theme: string; }
+interface Clip { id: string; title: string; titleKo?: string | null; titleEn?: string | null; url: string; source: string; theme: string; }
 
 // 7 watch themes → 2 macro labels for the ticker.
 const AI_THEMES = new Set(['AI_AGENT_PAYMENT', 'AI_FIN_INFRA', 'SOVEREIGN_AI', 'AI_PUBLIC_POLICY']);
@@ -12,8 +12,9 @@ function macro(theme: string): 'AI' | 'DA' {
 }
 
 export default function NewsTicker() {
-  const { t } = useLang();
+  const { t, lang } = useLang();
   const [clips, setClips] = useState<Clip[]>([]);
+  const headline = (c: Clip) => (lang === 'en' ? c.titleEn : c.titleKo) || c.title;
 
   useEffect(() => {
     fetch('/api/news').then(r => r.json()).then(d => setClips(d.clips || [])).catch(() => {});
@@ -43,7 +44,7 @@ export default function NewsTicker() {
                 <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${kind === 'AI' ? 'bg-white text-green-deep' : 'bg-[#e0a82e] text-[#1c1c1c]'}`}>
                   {kind === 'AI' ? t('AI 뉴스', 'AI') : t('디지털자산뉴스', 'Digital Asset')}
                 </span>
-                <span className="text-[12.5px] text-white/90 group-hover:text-white group-hover:underline">{c.title}</span>
+                <span className="text-[12.5px] text-white/90 group-hover:text-white group-hover:underline">{headline(c)}</span>
                 <span className="text-[11px] text-white/40">· {c.source}</span>
               </a>
             );

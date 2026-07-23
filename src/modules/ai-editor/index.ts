@@ -4,7 +4,7 @@
 // Reuses the same Claude endpoint/model as the rest of the platform.
 
 const CLAUDE_API = 'https://api.anthropic.com/v1/messages';
-const MODEL = 'claude-sonnet-4-20250514';
+const MODEL = 'claude-sonnet-5';
 
 export function aiEditorAvailable(): boolean {
   return !!process.env.ANTHROPIC_API_KEY;

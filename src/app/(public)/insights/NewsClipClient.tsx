@@ -7,6 +7,8 @@ import { CLIP_THEMES, type ClipTheme } from '@/modules/news-clip/themes';
 interface Clip {
   id: string;
   title: string;
+  titleKo?: string | null;
+  titleEn?: string | null;
   url: string;
   source: string;
   theme: string;
@@ -68,7 +70,7 @@ export default function NewsClipClient({ clips }: { clips: Clip[] }) {
                   <span className="text-[12px] text-gray-400">{c.source}</span>
                   <span className="text-[12px] text-gray-300 ml-auto">{c.publishedAt?.slice(0, 10)}</span>
                 </div>
-                <h3 className="text-[15.5px] font-semibold text-gray-900 leading-snug group-hover:text-green-deep">{c.title}</h3>
+                <h3 className="text-[15.5px] font-semibold text-gray-900 leading-snug group-hover:text-green-deep">{(lang === 'en' ? c.titleEn : c.titleKo) || c.title}</h3>
                 {c.excerpt && <p className="text-[13px] text-gray-500 mt-2 line-clamp-2 leading-relaxed">{c.excerpt}</p>}
               </a>
             ))}

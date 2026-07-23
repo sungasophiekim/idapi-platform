@@ -21,5 +21,14 @@ export async function GET(req: NextRequest) {
     result = { error: e.message };
   }
 
-  return NextResponse.json({ timestamp: new Date().toISOString(), newsClips: result });
+  // Translate published headlines (KO/EN) so the ticker can localize them.
+  let translation: any = {};
+  try {
+    const { translatePublishedTitles } = await import('@/modules/news-clip/translate');
+    translation = await translatePublishedTitles();
+  } catch (e: any) {
+    translation = { error: e.message };
+  }
+
+  return NextResponse.json({ timestamp: new Date().toISOString(), newsClips: result, translation });
 }
