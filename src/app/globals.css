@@ -2,19 +2,42 @@
 @import "tailwindcss";
 
 @theme {
-  --color-green-deep: #203E33;
-  --color-green-light: #2a5244;
-  --color-green-pale: #e8f0ed;
-  --color-green-50: #f0f5f3;
-  --color-border: #e2e2e0;
-  --color-bg-alt: #f7f8f6;
-  --font-sans: 'DM Sans', 'Noto Sans KR', system-ui, sans-serif;
-  --font-kr: 'Noto Sans KR', 'DM Sans', system-ui, sans-serif;
+  /* iDAPI issue-paper palette */
+  --color-green-deep: #1F3A2E;   /* forest */
+  --color-green-light: #2b4a3b;  /* forest hover */
+  --color-green-pale: #E9EFEA;   /* sage */
+  --color-green-50: #F1F5F1;
+  --color-border: #E1E5E1;       /* rule */
+  --color-bg-alt: #F3F6F3;
+
+  --color-forest-deep: #14251D;
+  --color-sage-mid: #C4D6C9;
+  --color-ground: #FCFCFA;
+  --color-ink: #161917;
+  --color-ink-soft: #565E58;
+  --color-ink-faint: #8A918C;
+  --color-flag: #A8503A;
+
+  --font-sans: 'Pretendard Variable', Pretendard, 'Noto Sans KR', system-ui, sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, 'SFMono-Regular', monospace;
+  --font-serif: 'Newsreader', Georgia, 'Times New Roman', serif;
+  --font-kr: 'Pretendard Variable', Pretendard, 'Noto Sans KR', system-ui, sans-serif;
 }
 
 body {
   font-family: var(--font-sans);
+  color: var(--color-ink);
+  letter-spacing: -0.012em;
+  font-feature-settings: 'tnum';
   -webkit-font-smoothing: antialiased;
+}
+
+/* Mono eyebrow/kicker label — issue-paper style */
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
 }
 
 /* Smooth page transitions */

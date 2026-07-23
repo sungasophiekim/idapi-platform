@@ -26,7 +26,7 @@ async function callClaude(system: string, user: string, maxTokens = 2048): Promi
 async function translateBatch(titles: string[], to: 'ko' | 'en'): Promise<string[]> {
   if (!titles.length) return [];
   const lang = to === 'en' ? 'English' : 'Korean';
-  const system = `You translate news headlines into ${lang} for a policy think tank on digital & AI public infrastructure. Keep them concise and headline-style. Preserve proper nouns, tickers, and org names. Respond ONLY with a JSON array of translated strings, same length and order as the input. No prose.`;
+  const system = `You translate news headlines into ${lang} for a policy think tank on digital and AI policy infrastructure. Keep them concise and headline-style. Preserve proper nouns, tickers, and org names. Respond ONLY with a JSON array of translated strings, same length and order as the input. No prose.`;
   const raw = await callClaude(system, JSON.stringify(titles));
   try {
     const arr = JSON.parse(raw.replace(/```json?\n?/g, '').replace(/```/g, '').trim());

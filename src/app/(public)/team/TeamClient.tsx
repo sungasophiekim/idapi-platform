@@ -10,7 +10,7 @@ export default function TeamClient({ members }: { members: any[] }) {
   return (
     <section className="pt-32 pb-20 max-w-[1140px] mx-auto px-6">
       <div className="text-[11px] font-bold tracking-widest uppercase text-green-deep mb-3">{t('팀 소개', 'Our Team')}</div>
-      <h2 className="text-2xl md:text-[32px] font-bold mb-2">{t('디지털·AI 공공 인프라의 미래를 정의하다', 'Defining the Future of Digital & AI Public Infrastructure')}</h2>
+      <h2 className="text-2xl md:text-[32px] font-bold mb-2">{t('디지털·AI 정책 인프라의 미래를 정의하다', 'Defining the Future of Digital and AI Policy Infrastructure')}</h2>
       <p className="text-[16px] italic text-gray-500 mb-10">{t('글로벌 통찰, 한국 중심의 실행', 'Global Insight. Korea-Focused Execution.')}</p>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">

@@ -5,6 +5,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useLang } from '@/lib/i18n';
 import { Icon } from '@/components/ui';
+import Logo from '@/components/Logo';
 
 export default function Header() {
   const { lang, setLang, t } = useLang();
@@ -45,11 +46,11 @@ export default function Header() {
       <div className="max-w-[1140px] mx-auto px-6 flex items-center justify-between h-16">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2.5 group">
-          <div className="w-[30px] h-[30px] bg-green-deep rounded-md flex items-center justify-center text-white font-bold text-[11px] tracking-wider">ID</div>
+          <Logo size={32} />
           <div className="leading-tight">
-            <div className="font-bold text-[17px] tracking-tight">iDAPI</div>
-            <div className="text-[10px] text-gray-400 tracking-wide">
-              {t('디지털·AI 공공인프라 연구소', 'Digital & AI Public Infrastructure')}
+            <div className="font-bold text-[17px] tracking-tight">IDAPI</div>
+            <div className="text-[10px] text-ink-faint tracking-wide">
+              {t('디지털·AI 정책인프라 연구소', 'Institute for Digital and AI Policy Infrastructure')}
             </div>
           </div>
         </Link>

@@ -20,7 +20,7 @@ export default function ResearchClient({ posts }: { posts: any[] }) {
 
   return (
     <section className="pt-32 pb-20 max-w-[1140px] mx-auto px-6">
-      <div className="text-[11px] font-bold tracking-widest uppercase text-green-deep mb-3">{t('연구정책자료', 'Research & Publications')}</div>
+      <div className="font-mono text-[10.5px] font-medium tracking-[0.13em] uppercase text-green-deep/70 mb-3">{t('연구정책자료', 'Research & Publications')}</div>
       <h1 className="text-2xl md:text-[32px] font-bold mb-6">{t('연구 및 정책 자료', 'Research & Policy Publications')}</h1>
 
       {/* Area Filter */}

@@ -202,9 +202,9 @@ export default function DashboardClient({ regulations, trends, briefings, stats,
       <div className="bg-gradient-to-br from-green-deep via-green-deep/90 to-green-deep/80 text-white rounded-2xl p-8 md:p-10 mb-6">
         <div className="flex items-start justify-between flex-wrap gap-6">
           <div className="max-w-2xl">
-            <div className="text-[11px] font-bold tracking-widest uppercase text-white/70 mb-3">{t('iDAPI 정책 인텔리전스', 'iDAPI Policy Intelligence')}</div>
+            <div className="text-[11px] font-bold tracking-widest uppercase text-white/70 mb-3">{t('IDAPI 정책 인텔리전스', 'IDAPI Policy Intelligence')}</div>
             <h1 className="text-3xl md:text-[40px] font-bold tracking-tight leading-tight mb-3">
-              {t('글로벌 디지털·AI 공공 인프라 정책 레이더', 'Global Digital & AI Public Infrastructure Policy Radar')}
+              {t('글로벌 디지털·AI 정책 인프라 레이더', 'Global Digital and AI Policy Infrastructure Radar')}
             </h1>
             <p className="text-white/70 text-[14px] leading-relaxed">
               {t(
@@ -253,7 +253,7 @@ export default function DashboardClient({ regulations, trends, briefings, stats,
         <div className="lg:col-span-2 bg-gradient-to-br from-green-50 to-white border border-green-deep/20 rounded-xl p-6">
           <div className="text-[11px] font-bold tracking-widest uppercase text-green-deep mb-2">{t('주간 뉴스레터', 'Weekly Newsletter')}</div>
           <h3 className="text-[16px] font-bold mb-2">{t('매주 정책 동향을 받아보세요', 'Get weekly policy updates')}</h3>
-          <p className="text-[12px] text-gray-500 mb-4 leading-relaxed">{t('매주 월요일, 디지털·AI 공공 인프라 정책 핵심 요약을 이메일로 전달합니다.', 'Every Monday — digital & AI public infrastructure policy digest delivered to your inbox.')}</p>
+          <p className="text-[12px] text-gray-500 mb-4 leading-relaxed">{t('매주 월요일, 디지털·AI 정책 인프라 핵심 요약을 이메일로 전달합니다.', 'Every Monday — digital and AI policy infrastructure digest delivered to your inbox.')}</p>
           {nlStatus === 'done' ? (
             <div className="text-[14px] text-green-700 font-semibold flex items-center gap-2">✓ {t('구독 완료!', 'Subscribed!')}</div>
           ) : (
@@ -711,7 +711,7 @@ export default function DashboardClient({ regulations, trends, briefings, stats,
                     {feedbackSubmitting ? '...' : t('제출', 'Submit')}
                   </button>
                 </div>
-                <p className="text-[11px] text-gray-400 mt-2">{t('제출된 의견은 iDAPI 정책 제언 보고서에 익명으로 반영됩니다.', 'Feedback is anonymously included in iDAPI policy recommendation reports.')}</p>
+                <p className="text-[11px] text-gray-400 mt-2">{t('제출된 의견은 IDAPI 정책 제언 보고서에 익명으로 반영됩니다.', 'Feedback is anonymously included in IDAPI policy recommendation reports.')}</p>
               </div>
             )}
           </div>

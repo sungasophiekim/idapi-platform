@@ -46,12 +46,12 @@ export default function FocusAreasPage() {
             {t('연구영역', 'Focus Areas')}
           </div>
           <h1 className="text-[38px] font-bold tracking-tight leading-tight text-gray-900">
-            {t('디지털·AI 공공 인프라의 다섯 축', 'Five pillars of digital & AI public infrastructure')}
+            {t('디지털·AI 정책 인프라의 다섯 축', 'Five pillars of digital and AI policy infrastructure')}
           </h1>
           <p className="mt-4 text-[15px] text-gray-500 leading-relaxed">
             {t(
-              'iDAPI는 디지털·AI 시대의 공공 인프라를 다섯 개 연구영역으로 나누어 정책을 설계합니다.',
-              'iDAPI shapes policy across five focus areas at the core of the digital & AI era.',
+              'IDAPI는 디지털·AI 시대의 정책 인프라를 다섯 개 연구영역으로 나누어 정책을 설계합니다.',
+              'IDAPI shapes policy across five focus areas at the core of the digital and AI era.',
             )}
           </p>
         </div>

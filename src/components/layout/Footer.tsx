@@ -3,6 +3,7 @@
 
 import Link from 'next/link';
 import { useLang } from '@/lib/i18n';
+import Logo from '@/components/Logo';
 
 export default function Footer() {
   const { t } = useLang();
@@ -13,18 +14,18 @@ export default function Footer() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-9 mb-10">
           {/* Brand */}
           <div>
-            <div className="flex items-center gap-2 mb-3">
-              <div className="w-[26px] h-[26px] bg-white/15 rounded flex items-center justify-center text-[9px] font-bold tracking-wider">ID</div>
-              <span className="font-bold text-[16px]">iDAPI</span>
+            <div className="flex items-center gap-2.5 mb-3">
+              <Logo size={26} onDark />
+              <span className="font-bold text-[16px]">IDAPI</span>
             </div>
             <p className="text-[13px] text-white/50 leading-relaxed max-w-[260px]">
-              {t('디지털·AI 시대의 공공 인프라를 설계하는 정책 싱크탱크', 'Shaping public infrastructure for the digital & AI era')}
+              {t('디지털·AI 시대의 정책 인프라를 설계하는 정책 싱크탱크', 'Institute for Digital and AI Policy Infrastructure')}
             </p>
           </div>
 
           {/* Research */}
           <div>
-            <h5 className="text-[10px] font-bold tracking-widest uppercase text-white/35 mb-4">{t('연구영역', 'Focus Areas')}</h5>
+            <h5 className="font-mono text-[10px] font-medium tracking-[0.12em] uppercase text-white/40 mb-4">{t('연구영역', 'Focus Areas')}</h5>
             <div className="space-y-2">
               {[
                 { ko: 'AI 거버넌스·규제', en: 'AI Governance & Regulation' },
@@ -40,7 +41,7 @@ export default function Footer() {
 
           {/* Activities */}
           <div>
-            <h5 className="text-[10px] font-bold tracking-widest uppercase text-white/35 mb-4">{t('활동', 'Activities')}</h5>
+            <h5 className="font-mono text-[10px] font-medium tracking-[0.12em] uppercase text-white/40 mb-4">{t('활동', 'Activities')}</h5>
             <div className="space-y-2">
               {[
                 t('글로벌 정책 대화', 'Global Policy Dialogue'),
@@ -54,9 +55,9 @@ export default function Footer() {
 
           {/* About */}
           <div>
-            <h5 className="text-[10px] font-bold tracking-widest uppercase text-white/35 mb-4">{t('소개', 'About')}</h5>
+            <h5 className="font-mono text-[10px] font-medium tracking-[0.12em] uppercase text-white/40 mb-4">{t('소개', 'About')}</h5>
             <div className="space-y-2">
-              <Link href="/about" className="block text-[13px] text-white/60 hover:text-white transition-colors">About iDAPI</Link>
+              <Link href="/about" className="block text-[13px] text-white/60 hover:text-white transition-colors">About IDAPI</Link>
               <Link href="/team" className="block text-[13px] text-white/60 hover:text-white transition-colors">{t('팀 소개', 'Our Team')}</Link>
               <Link href="/sponsors" className="block text-[13px] text-white/60 hover:text-white transition-colors">{t('후원 안내', 'Sponsorship')}</Link>
             </div>
@@ -64,7 +65,7 @@ export default function Footer() {
         </div>
 
         <div className="border-t border-white/10 pt-5 flex flex-col sm:flex-row justify-between text-[12px] text-white/35 gap-2">
-          <span>&copy; 2026 iDAPI. All rights reserved.</span>
+          <span>&copy; 2026 IDAPI. All rights reserved.</span>
           <span>Singapore &middot; Seoul</span>
         </div>
       </div>

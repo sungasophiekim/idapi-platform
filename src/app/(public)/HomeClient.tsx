@@ -27,17 +27,17 @@ export default function HomeClient({ posts }: { posts: any[] }) {
       <section className="pt-36 pb-20 text-center relative">
         <div className="max-w-[1140px] mx-auto px-6">
           <div className="inline-flex items-center gap-2 text-[11px] font-bold text-green-deep tracking-widest uppercase mb-5">
-            <span className="w-5 h-px bg-green-deep/40" />iDAPI<span className="w-5 h-px bg-green-deep/40" />
+            <span className="w-5 h-px bg-green-deep/40" />IDAPI<span className="w-5 h-px bg-green-deep/40" />
           </div>
           <h1 className="text-3xl md:text-[42px] font-bold leading-[1.35] mb-6 tracking-tight">
-            {t('디지털·AI 시대의', 'Shaping public infrastructure')}
+            {t('디지털·AI 시대의', 'Shaping policy infrastructure')}
             <br />
-            {t('공공 인프라를 설계합니다', 'for the digital & AI era')}
+            {t('정책 인프라를 설계합니다', 'for the digital and AI era')}
           </h1>
           <p className="text-[17px] text-gray-500 max-w-[620px] mx-auto mb-9 leading-relaxed">
             {t(
-              '디지털·AI 공공인프라 연구소(iDAPI)는 AI 거버넌스, 디지털 공공인프라, 신원·데이터·디지털 자산 정책을 연구하는 비영리·비당파 정책 싱크탱크입니다.',
-              'iDAPI is a non-profit, non-partisan policy think tank researching AI governance, digital public infrastructure, and identity, data, and digital asset policy.'
+              '디지털·AI 정책인프라 연구소(IDAPI)는 AI 거버넌스, 디지털 공공인프라, 신원·데이터·디지털 자산 정책을 연구하는 비영리·비당파 정책 싱크탱크입니다.',
+              'IDAPI is a non-profit, non-partisan policy think tank researching AI governance, digital public infrastructure, and identity, data, and digital asset policy.'
             )}
           </p>
           <div className="flex gap-3 justify-center flex-wrap">
@@ -50,10 +50,10 @@ export default function HomeClient({ posts }: { posts: any[] }) {
       {/* ─── RESEARCH AREAS ─── */}
       <section className="py-20 max-w-[1140px] mx-auto px-6">
         <div className="text-[11px] font-bold tracking-widest uppercase text-green-deep mb-3">{t('연구영역', 'Focus Areas')}</div>
-        <h2 className="text-2xl md:text-[32px] font-bold mb-3 tracking-tight">{t('디지털·AI 공공 인프라의 지식 베이스', 'The Knowledge Base for Digital & AI Public Infrastructure')}</h2>
+        <h2 className="text-2xl md:text-[32px] font-bold mb-3 tracking-tight">{t('디지털·AI 정책 인프라의 지식 베이스', 'The Knowledge Base for Digital and AI Policy Infrastructure')}</h2>
         <p className="text-[16px] text-gray-500 max-w-[620px] leading-relaxed mb-11">
-          {t('iDAPI는 독자적인 연구 역량과 전문가 네트워크를 결합하여, 디지털·AI 시대 공공 인프라 정책의 지식 베이스를 구축합니다.',
-            'iDAPI combines independent research with a professional network to build the knowledge base for digital & AI public infrastructure policy.')}
+          {t('IDAPI는 독자적인 연구 역량과 전문가 네트워크를 결합하여, 디지털·AI 시대 정책 인프라의 지식 베이스를 구축합니다.',
+            'IDAPI combines independent research with a professional network to build the knowledge base for digital and AI policy infrastructure.')}
         </p>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
           {AREAS_LIST.map(a => (

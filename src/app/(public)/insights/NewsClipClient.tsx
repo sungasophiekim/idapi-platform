@@ -32,7 +32,7 @@ export default function NewsClipClient({ clips }: { clips: Clip[] }) {
     <div className="pt-28 pb-24">
       <div className="max-w-[1140px] mx-auto px-6">
         <div className="max-w-[680px] mb-10">
-          <div className="text-[11px] font-bold tracking-widest uppercase text-green-deep/60 mb-3">
+          <div className="font-mono text-[10.5px] font-medium tracking-[0.13em] uppercase text-green-deep/70 mb-3">
             {t('뉴스클리핑', 'News Clipping')}
           </div>
           <h1 className="text-[38px] font-bold tracking-tight leading-tight text-gray-900">
@@ -40,8 +40,8 @@ export default function NewsClipClient({ clips }: { clips: Clip[] }) {
           </h1>
           <p className="mt-4 text-[15px] text-gray-500 leading-relaxed">
             {t(
-              'iDAPI가 7개 워치 테마로 큐레이션한 AI·블록체인 인프라 주요 뉴스입니다.',
-              'Curated headlines across iDAPI’s 7 watch themes in AI & blockchain infrastructure.',
+              'IDAPI가 7개 워치 테마로 큐레이션한 AI·블록체인 인프라 주요 뉴스입니다.',
+              'Curated headlines across IDAPI’s 7 watch themes in AI & blockchain infrastructure.',
             )}
           </p>
         </div>
