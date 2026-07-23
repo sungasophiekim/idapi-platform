@@ -17,7 +17,7 @@ export type ClipTheme = keyof typeof CLIP_THEMES;
 const KEYWORDS: Record<ClipTheme, string[]> = {
   RWA: ['rwa', 'real world asset', 'real-world asset', 'tokenized asset', 'asset tokenization', 'tokenized treasury', 'tokenized fund', '실물자산', '토큰화', '실물연계'],
   STABLECOIN: ['stablecoin', 'stable coin', '스테이블코인', 'tokenized deposit', 'usdc', 'usdt', 'pyusd', '예치금 토큰', '지급결제 토큰'],
-  DA_FIN_INFRA: ['digital asset infrastructure', 'crypto custody', 'digital asset custody', 'settlement layer', 'on-chain finance', 'onchain finance', 'tokenized securities', 'digital securities', '수탁', '청산결제', '디지털자산 인프라', 'sto'],
+  DA_FIN_INFRA: ['digital asset infrastructure', 'crypto custody', 'digital asset custody', 'settlement layer', 'on-chain finance', 'onchain finance', 'tokenized securities', 'digital securities', '수탁', '청산결제', '디지털자산 인프라', 'sto', 'casp', 'crypto-asset service', 'crypto asset service', 'markets in crypto', 'mica', '디지털자산기본법', '가상자산이용자보호'],
   AI_AGENT_PAYMENT: ['ai agent payment', 'agentic payment', 'agentic commerce', 'agent payment', 'x402', 'autonomous payment', 'machine payment', 'machine-to-machine payment', 'agent wallet', 'ai 결제', '에이전트 결제'],
   AI_FIN_INFRA: ['ai financial infrastructure', 'ai in finance', 'ai banking', 'ai trading', 'ai underwriting', 'ai for payments', 'ai risk', '금융 ai', 'ai 금융'],
   SOVEREIGN_AI: ['sovereign ai', 'ai sovereignty', 'national ai', 'domestic ai', 'ai independence', '소버린 ai', '국가 ai', '주권 ai'],
