@@ -27,55 +27,61 @@ export default function HomeClient({ posts }: { posts: any[] }) {
   return (
     <>
       {/* ─── HERO BANNER — featured + recent sidebar ─── */}
-      <section className="bg-green-deep text-white">
-        <div className="max-w-[1140px] mx-auto px-6 pt-24 pb-14 md:pt-28 md:pb-16">
+      <section className="text-white bg-[radial-gradient(120%_130%_at_15%_0%,#24463703_0%,#1F3A2E_38%,#14251D_100%)]">
+        <div className="max-w-[1140px] mx-auto px-6 pt-10 pb-16 md:pt-12 md:pb-20">
+          {/* Masthead line */}
+          <div className="flex items-center justify-between pb-6 mb-9 border-b border-white/15">
+            <span className="font-mono text-[10.5px] tracking-[0.16em] uppercase text-[#f0c059]">{t('IDAPI 리서치', 'IDAPI Research')}</span>
+            <Link href="/research" className="font-mono text-[10.5px] tracking-[0.08em] text-white/50 hover:text-white transition-colors">{t('전체 연구자료 →', 'All research →')}</Link>
+          </div>
+
           {posts.length > 0 ? (
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-10 lg:gap-12">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-x-12 gap-y-10">
               {/* Featured (left, 2/3) */}
               <div className="lg:col-span-2 flex flex-col">
                 <Link href={`/research/${active.slug}`} className="block group flex-1">
-                  <span className="inline-block font-mono text-[10px] tracking-[0.13em] uppercase bg-white/10 border border-white/15 text-white px-2.5 py-1 rounded mb-6">
-                    {CATEGORIES[active.category as keyof typeof CATEGORIES]?.[lang] || active.category}
-                  </span>
-                  <h1 className={`text-[30px] md:text-[48px] font-bold leading-[1.13] tracking-[-0.03em] group-hover:text-white/90 transition-colors ${lang === 'en' ? 'font-serif font-medium leading-[1.08]' : ''}`}>
+                  <div className="flex items-center gap-3 mb-6">
+                    <span className="font-mono text-[10px] tracking-[0.13em] uppercase bg-[#f0c059] text-[#1c1c1c] px-2.5 py-1 rounded font-medium">
+                      {CATEGORIES[active.category as keyof typeof CATEGORIES]?.[lang] || active.category}
+                    </span>
+                    <span className="font-mono text-[10.5px] tracking-[0.06em] text-white/55">{RESEARCH_AREAS[active.researchArea as keyof typeof RESEARCH_AREAS]?.[lang]}</span>
+                  </div>
+                  <h1 className={`text-[32px] md:text-[52px] font-bold leading-[1.1] tracking-[-0.035em] group-hover:text-[#f0c059] transition-colors ${lang === 'en' ? 'font-serif font-medium leading-[1.06]' : ''}`}>
                     {bi(active.title, active.titleEn)}
                   </h1>
                   {(active.excerpt || active.excerptEn) && (
-                    <p className="mt-5 text-[16px] md:text-[17px] text-white/65 leading-[1.65] max-w-[62ch]">{bi(active.excerpt, active.excerptEn)}</p>
+                    <p className="mt-5 text-[16px] md:text-[17.5px] text-white/80 leading-[1.65] max-w-[60ch]">{bi(active.excerpt, active.excerptEn)}</p>
                   )}
-                  <div className="mt-6 flex items-center gap-3 font-mono text-[11px] tracking-[0.04em] text-white/50">
+                  <div className="mt-6 flex items-center gap-3 font-mono text-[11px] tracking-[0.04em] text-white/55">
                     <span>{active.teamAuthor ? bi(active.teamAuthor.name, active.teamAuthor.nameEn) : 'IDAPI Research'}</span>
-                    <span className="text-white/25">·</span>
+                    <span className="text-white/30">·</span>
                     <span>{active.publishedAt?.slice(0, 10)}</span>
                   </div>
-                  <span className="inline-flex items-center gap-2 mt-7 px-5 py-2.5 border border-white/25 rounded text-[13px] font-semibold group-hover:bg-white group-hover:text-green-deep transition-colors">
-                    {t('전문 읽기', 'Read now')} <Icon name="arrow" size={14} />
+                  <span className="inline-flex items-center gap-2 mt-8 px-6 py-3 bg-[#f0c059] text-green-deep rounded text-[13px] font-bold group-hover:gap-3.5 transition-all">
+                    {t('전문 읽기', 'Read now')} <Icon name="arrow" size={15} />
                   </span>
                 </Link>
                 {/* Carousel dots */}
                 {featured.length > 1 && (
-                  <div className="flex gap-2 mt-9">
+                  <div className="flex gap-2 mt-10">
                     {featured.map((_: any, i: number) => (
                       <button key={i} onClick={() => setFeat(i)} aria-label={`featured ${i + 1}`}
-                        className={`h-1.5 rounded-full transition-all ${i === feat ? 'w-6 bg-white' : 'w-1.5 bg-white/30 hover:bg-white/50'}`} />
+                        className={`h-1.5 rounded-full transition-all ${i === feat ? 'w-7 bg-[#f0c059]' : 'w-1.5 bg-white/25 hover:bg-white/45'}`} />
                     ))}
                   </div>
                 )}
               </div>
 
               {/* Recent (right sidebar, 1/3) */}
-              <aside className="lg:border-l lg:border-white/12 lg:pl-12">
-                <div className="flex items-baseline justify-between mb-5">
-                  <span className="eyebrow text-white/55">{t('최신 연구', 'Recent')}</span>
-                  <Link href="/research" className="font-mono text-[11px] tracking-[0.06em] text-white/45 hover:text-white">{t('전체 →', 'All →')}</Link>
-                </div>
+              <aside className="lg:border-l lg:border-white/15 lg:pl-12">
+                <div className="eyebrow text-[#f0c059]/90 mb-5">{t('최신 연구', 'Recent')}</div>
                 <div>
                   {posts.slice(0, 5).map((p: any) => (
                     <Link key={p.id} href={`/research/${p.slug}`} className="group block py-4 border-b border-white/12 first:pt-0">
-                      <h3 className="text-[15px] font-semibold leading-snug text-white/90 group-hover:text-white transition-colors">{bi(p.title, p.titleEn)}</h3>
-                      <div className="flex items-center gap-2 mt-1.5 font-mono text-[10px] tracking-[0.04em] text-white/40">
-                        <span className="text-[#f0c059]/80">{CATEGORIES[p.category as keyof typeof CATEGORIES]?.[lang] || p.category}</span>
-                        <span className="text-white/20">·</span>
+                      <h3 className="text-[15px] font-semibold leading-snug text-white group-hover:text-[#f0c059] transition-colors">{bi(p.title, p.titleEn)}</h3>
+                      <div className="flex items-center gap-2 mt-1.5 font-mono text-[10px] tracking-[0.04em] text-white/50">
+                        <span className="text-[#f0c059]/85">{CATEGORIES[p.category as keyof typeof CATEGORIES]?.[lang] || p.category}</span>
+                        <span className="text-white/25">·</span>
                         <span>{p.publishedAt?.slice(0, 10)}</span>
                       </div>
                     </Link>
