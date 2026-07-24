@@ -4,7 +4,6 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useLang } from '@/lib/i18n';
-import { Icon, Badge } from '@/components/ui';
 import { CATEGORIES, RESEARCH_AREAS } from '@/types';
 
 export default function ResearchClient({ posts }: { posts: any[] }) {
@@ -24,53 +23,48 @@ export default function ResearchClient({ posts }: { posts: any[] }) {
       <h1 className="text-2xl md:text-[32px] font-bold mb-6">{t('연구 및 정책 자료', 'Research & Policy Publications')}</h1>
 
       {/* Area Filter */}
-      <div className="flex gap-2 mb-3 flex-wrap">
-        <span className="text-[12px] font-semibold text-gray-400 self-center mr-1">{t('연구영역', 'Area')}:</span>
+      <div className="flex items-baseline gap-x-5 gap-y-1.5 mb-2.5 flex-wrap">
+        <span className="font-mono text-[10px] tracking-[0.1em] uppercase text-ink-faint w-16 shrink-0">{t('연구영역', 'Area')}</span>
         {[{ value: 'all', label: t('전체', 'All') }, ...Object.entries(RESEARCH_AREAS).map(([k, v]) => ({ value: k, label: lang === 'en' ? v.en : v.ko }))].map(a => (
           <button key={a.value} onClick={() => setAreaFilter(a.value)}
-            className={`px-3 py-1 rounded-md text-[12px] font-medium border transition-all cursor-pointer ${areaFilter === a.value ? 'bg-green-deep text-white border-green-deep' : 'bg-white text-gray-500 border-gray-200'}`}>
+            className={`font-mono text-[11px] tracking-[0.04em] uppercase pb-0.5 border-b-2 transition-colors cursor-pointer ${areaFilter === a.value ? 'border-green-deep text-green-deep' : 'border-transparent text-ink-faint hover:text-ink-soft'}`}>
             {a.label}
           </button>
         ))}
       </div>
 
       {/* Category Filter */}
-      <div className="flex gap-2 mb-8 flex-wrap">
-        <span className="text-[12px] font-semibold text-gray-400 self-center mr-1">{t('카테고리', 'Category')}:</span>
+      <div className="flex items-baseline gap-x-5 gap-y-1.5 mb-8 flex-wrap">
+        <span className="font-mono text-[10px] tracking-[0.1em] uppercase text-ink-faint w-16 shrink-0">{t('카테고리', 'Type')}</span>
         {[{ value: 'all', label: t('전체', 'All') }, ...Object.entries(CATEGORIES).map(([k, v]) => ({ value: k, label: lang === 'en' ? v.en : v.ko }))].map(c => (
           <button key={c.value} onClick={() => setCatFilter(c.value)}
-            className={`px-3 py-1 rounded-full text-[12px] font-medium border transition-all cursor-pointer ${catFilter === c.value ? 'bg-green-deep text-white border-green-deep' : 'bg-white text-gray-500 border-gray-200'}`}>
+            className={`font-mono text-[11px] tracking-[0.04em] uppercase pb-0.5 border-b-2 transition-colors cursor-pointer ${catFilter === c.value ? 'border-green-deep text-green-deep' : 'border-transparent text-ink-faint hover:text-ink-soft'}`}>
             {c.label}
           </button>
         ))}
       </div>
 
       {/* Results */}
-      <div className="text-[13px] text-gray-400 mb-4">{filtered.length} {t('건', 'results')}</div>
+      <div className="font-mono text-[11px] text-ink-faint mb-2 pb-3 border-b border-border">{filtered.length} {t('건', 'results')}</div>
 
-      <div className="space-y-3">
+      <div>
         {filtered.map((p: any) => (
           <Link key={p.id} href={`/research/${p.slug}`}
-            className="block bg-white border border-border rounded-xl p-5 hover:border-green-deep/30 hover:-translate-y-0.5 hover:shadow-md transition-all group">
-            <div className="flex items-start gap-4">
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 mb-2">
-                  <Badge>{CATEGORIES[p.category as keyof typeof CATEGORIES]?.[lang] || p.category}</Badge>
-                  <span className="text-[11px] text-gray-400">{RESEARCH_AREAS[p.researchArea as keyof typeof RESEARCH_AREAS]?.[lang]}</span>
-                </div>
-                <h3 className="text-[16px] font-semibold mb-1.5 group-hover:text-green-deep transition-colors">{bi(p.title, p.titleEn)}</h3>
-                <p className="text-[13px] text-gray-400 line-clamp-2 leading-relaxed">{bi(p.excerpt, p.excerptEn)}</p>
-              </div>
-              <div className="text-right shrink-0 hidden sm:block">
-                <div className="text-[12px] text-gray-400">{p.publishedAt?.slice(0, 10)}</div>
-                {p.teamAuthor && <div className="text-[12px] text-gray-400 mt-1">{bi(p.teamAuthor.name, p.teamAuthor.nameEn)}</div>}
-                <div className="text-[11px] text-gray-300 mt-1"><Icon name="eye" size={12} className="inline mr-1" />{p.viewCount}</div>
-              </div>
+            className="group flex items-baseline gap-4 md:gap-6 py-6 border-b border-border">
+            <span className="font-mono text-[10px] tracking-[0.1em] uppercase text-green-deep w-20 md:w-28 shrink-0 pt-1">{CATEGORIES[p.category as keyof typeof CATEGORIES]?.[lang] || p.category}</span>
+            <div className="flex-1 min-w-0">
+              <h3 className="text-[17px] md:text-[18px] font-semibold tracking-tight group-hover:text-green-deep transition-colors">{bi(p.title, p.titleEn)}</h3>
+              <p className="text-[13.5px] text-ink-soft line-clamp-2 leading-relaxed mt-1.5 max-w-[74ch]">{bi(p.excerpt, p.excerptEn)}</p>
+              <div className="text-[11.5px] text-ink-faint mt-2">{RESEARCH_AREAS[p.researchArea as keyof typeof RESEARCH_AREAS]?.[lang]}</div>
+            </div>
+            <div className="text-right shrink-0 hidden sm:block font-mono text-[11px] text-ink-faint pt-1">
+              <div>{p.publishedAt?.slice(0, 10)}</div>
+              {p.teamAuthor && <div className="mt-1 not-italic">{bi(p.teamAuthor.name, p.teamAuthor.nameEn)}</div>}
             </div>
           </Link>
         ))}
         {filtered.length === 0 && (
-          <div className="py-16 text-center text-gray-400">{t('등록된 자료가 없습니다.', 'No publications found.')}</div>
+          <div className="py-16 text-center text-ink-faint">{t('등록된 자료가 없습니다.', 'No publications found.')}</div>
         )}
       </div>
     </section>

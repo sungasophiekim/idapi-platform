@@ -79,45 +79,45 @@ export default function HomeClient({ posts }: { posts: any[] }) {
       </section>
 
       {/* ─── RESEARCH AREAS ─── */}
-      <section className="py-20 max-w-[1140px] mx-auto px-6">
-        <div className="text-[11px] font-bold tracking-widest uppercase text-green-deep mb-3">{t('연구영역', 'Focus Areas')}</div>
-        <h2 className="text-2xl md:text-[32px] font-bold mb-3 tracking-tight">{t('디지털·AI 정책 인프라의 지식 베이스', 'The Knowledge Base for Digital and AI Policy Infrastructure')}</h2>
-        <p className="text-[16px] text-gray-500 max-w-[620px] leading-relaxed mb-11">
+      <section className="py-16 md:py-20 max-w-[1140px] mx-auto px-6">
+        <div className="eyebrow text-green-deep/70 mb-3">{t('연구영역', 'Focus Areas')}</div>
+        <h2 className="text-2xl md:text-[30px] font-bold mb-3 tracking-tight">{t('디지털·AI 정책 인프라의 지식 베이스', 'The Knowledge Base for Digital and AI Policy Infrastructure')}</h2>
+        <p className="text-[15px] text-ink-soft max-w-[620px] leading-relaxed mb-10">
           {t('IDAPI는 독자적인 연구 역량과 전문가 네트워크를 결합하여, 디지털·AI 시대 정책 인프라의 지식 베이스를 구축합니다.',
             'IDAPI combines independent research with a professional network to build the knowledge base for digital and AI policy infrastructure.')}
         </p>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+        <div className="border-t border-border">
           {AREAS_LIST.map(a => (
-            <Link href="/focus-areas" key={a.num} className="border border-border rounded-xl p-7 hover:border-green-deep hover:-translate-y-0.5 hover:shadow-lg transition-all duration-300 cursor-pointer group relative overflow-hidden block">
-              <div className="absolute top-0 left-0 right-0 h-[3px] bg-green-deep opacity-0 group-hover:opacity-100 transition-opacity" />
-              <div className="text-[11px] font-bold text-green-deep tracking-widest mb-3">{a.num}</div>
-              <div className="w-9 h-9 bg-green-pale rounded-lg flex items-center justify-center text-green-deep mb-3.5"><Icon name={a.icon} size={18} /></div>
-              <h3 className="text-[17px] font-bold mb-2">{lang === 'en' ? a.titleEn : a.titleKo}</h3>
-              <p className="text-[13.5px] text-gray-500 leading-relaxed">{lang === 'en' ? a.descEn : a.descKo}</p>
+            <Link href="/focus-areas" key={a.num} className="group flex items-start gap-5 md:gap-8 py-6 border-b border-border">
+              <span className="font-mono text-[12px] text-green-deep/60 pt-1 w-7 shrink-0">{a.num}</span>
+              <div className="flex-1 min-w-0">
+                <h3 className="text-[17px] md:text-[19px] font-bold tracking-tight group-hover:text-green-deep transition-colors">{lang === 'en' ? a.titleEn : a.titleKo}</h3>
+                <p className="text-[14px] text-ink-soft leading-relaxed mt-1.5 max-w-[72ch]">{lang === 'en' ? a.descEn : a.descKo}</p>
+              </div>
+              <Icon name="arrow" size={15} className="text-ink-faint mt-1.5 opacity-0 group-hover:opacity-100 transition-opacity hidden md:block" />
             </Link>
           ))}
         </div>
       </section>
 
       {/* ─── POLICY FORUM ─── */}
-      <section className="py-20 bg-bg-alt">
+      <section className="py-16 md:py-20 bg-bg-alt border-y border-border">
         <div className="max-w-[1140px] mx-auto px-6">
-          <div className="text-[11px] font-bold tracking-widest uppercase text-green-deep mb-3">{t('정책포럼 & 활동', 'Policy Forum & Engagement')}</div>
-          <h2 className="text-2xl md:text-[32px] font-bold mb-3">{t('지식을 넘어 가교로, 연구를 넘어 실천으로', 'Beyond knowledge, a bridge. Beyond research, action.')}</h2>
-          <p className="text-[16px] text-gray-500 max-w-[600px] leading-relaxed mb-11">
+          <div className="eyebrow text-green-deep/70 mb-3">{t('정책포럼 & 활동', 'Policy Forum & Engagement')}</div>
+          <h2 className="text-2xl md:text-[30px] font-bold mb-3 tracking-tight">{t('지식을 넘어 가교로, 연구를 넘어 실천으로', 'Beyond knowledge, a bridge. Beyond research, action.')}</h2>
+          <p className="text-[15px] text-ink-soft max-w-[600px] leading-relaxed mb-11">
             {t('합리적인 정책 대안 모색과 산업의 건강한 성장을 돕는 민·관·정 통합 정책 플랫폼을 지향합니다.',
               'An integrated policy platform bringing together public and private sectors, government, and industry.')}
           </p>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12">
             {[
-              { icon: 'globe', ko: '글로벌 정책 대화', en: 'Global Policy Dialogue', tagKo: '국경 없는 기술, 글로벌 스탠다드의 논의', tagEn: 'Borderless technology. Global standards in dialogue.', dKo: 'AI 거버넌스와 디지털 공공 인프라의 글로벌 표준을 연구하고, 한국과 국제 생태계가 정합성을 이룰 수 있도록 지식과 정보를 공유합니다.', dEn: 'Advances research on global standards for AI governance and digital public infrastructure, and their alignment across jurisdictions.' },
-              { icon: 'users', ko: '정책 라운드테이블 / 세미나', en: 'Policy Roundtables / Seminars', tagKo: '민·관·정 통합 소통을 위한 정책 공론장', tagEn: 'A public forum for integrated cross-sector dialogue', dKo: '현장의 목소리와 정책 입안자의 고민이 만나는 중립적 소통의 가교입니다.', dEn: 'Convenes policymakers, financial institutions, and industry leaders for constructive dialogue.' },
+              { ko: '글로벌 정책 대화', en: 'Global Policy Dialogue', tagKo: '국경 없는 기술, 글로벌 스탠다드의 논의', tagEn: 'Borderless technology. Global standards in dialogue.', dKo: 'AI 거버넌스와 디지털 공공 인프라의 글로벌 표준을 연구하고, 한국과 국제 생태계가 정합성을 이룰 수 있도록 지식과 정보를 공유합니다.', dEn: 'Advances research on global standards for AI governance and digital public infrastructure, and their alignment across jurisdictions.' },
+              { ko: '정책 라운드테이블 / 세미나', en: 'Policy Roundtables / Seminars', tagKo: '민·관·정 통합 소통을 위한 정책 공론장', tagEn: 'A public forum for integrated cross-sector dialogue', dKo: '현장의 목소리와 정책 입안자의 고민이 만나는 중립적 소통의 가교입니다.', dEn: 'Convenes policymakers, financial institutions, and industry leaders for constructive dialogue.' },
             ].map((f, i) => (
-              <div key={i} className="bg-white border border-border rounded-xl p-8">
-                <div className="w-11 h-11 bg-green-deep rounded-xl flex items-center justify-center text-white mb-5"><Icon name={f.icon} size={22} /></div>
-                <h3 className="text-[17px] font-bold mb-1.5">{lang === 'en' ? f.en : f.ko}</h3>
-                <div className="text-[12px] font-semibold text-green-deep mb-3">{lang === 'en' ? f.tagEn : f.tagKo}</div>
-                <p className="text-[13.5px] text-gray-500 leading-relaxed">{lang === 'en' ? f.dEn : f.dKo}</p>
+              <div key={i} className="border-t-2 border-green-deep pt-5">
+                <h3 className="text-[18px] font-bold tracking-tight">{lang === 'en' ? f.en : f.ko}</h3>
+                <div className="text-[12.5px] font-semibold text-green-deep mt-1.5">{lang === 'en' ? f.tagEn : f.tagKo}</div>
+                <p className="text-[14px] text-ink-soft leading-relaxed mt-3 max-w-[52ch]">{lang === 'en' ? f.dEn : f.dKo}</p>
               </div>
             ))}
           </div>
@@ -125,48 +125,50 @@ export default function HomeClient({ posts }: { posts: any[] }) {
       </section>
 
       {/* ─── PUBLICATIONS ─── */}
-      <section className="py-20 max-w-[1140px] mx-auto px-6">
-        <div className="text-[11px] font-bold tracking-widest uppercase text-green-deep mb-3">{t('연구정책자료', 'Research & Publications')}</div>
-        <h2 className="text-2xl md:text-[32px] font-bold mb-6">{t('최신 연구 및 정책 자료', 'Latest Research & Publications')}</h2>
-        <div className="flex gap-2 mb-7 flex-wrap">
+      <section className="py-16 md:py-20 max-w-[1140px] mx-auto px-6">
+        <div className="flex items-baseline justify-between mb-6">
+          <div>
+            <div className="eyebrow text-green-deep/70 mb-3">{t('연구정책자료', 'Research & Publications')}</div>
+            <h2 className="text-2xl md:text-[30px] font-bold tracking-tight">{t('최신 연구 및 정책 자료', 'Latest Research & Publications')}</h2>
+          </div>
+          <Link href="/research" className="font-mono text-[11px] tracking-[0.06em] text-ink-faint hover:text-green-deep hidden sm:block">{t('전체 보기 →', 'All →')}</Link>
+        </div>
+        <div className="flex gap-x-5 gap-y-1.5 mb-7 flex-wrap">
           {[{ value: 'all', label: t('전체', 'All') }, ...Object.entries(CATEGORIES).map(([k, v]) => ({ value: k, label: lang === 'en' ? v.en : v.ko }))].map(c => (
             <button key={c.value} onClick={() => setFilter(c.value)}
-              className={`px-4 py-1.5 rounded-full text-[13px] font-medium border transition-all cursor-pointer ${filter === c.value ? 'bg-green-deep text-white border-green-deep' : 'bg-white text-gray-500 border-gray-200 hover:border-gray-400'}`}>
+              className={`font-mono text-[11px] tracking-[0.04em] uppercase pb-1 border-b-2 transition-colors cursor-pointer ${filter === c.value ? 'border-green-deep text-green-deep' : 'border-transparent text-ink-faint hover:text-ink-soft'}`}>
               {c.label}
             </button>
           ))}
         </div>
-        <div className="border border-border rounded-xl overflow-hidden">
-          {filtered.map((p: any, i: number) => (
+        <div className="border-t border-border">
+          {filtered.map((p: any) => (
             <Link key={p.id} href={`/research/${p.slug}`}
-              className={`flex items-center gap-4 px-5 py-4 bg-white hover:bg-green-50 transition-colors ${i < filtered.length - 1 ? 'border-b border-gray-100' : ''}`}>
-              <Badge>{CATEGORIES[p.category as keyof typeof CATEGORIES]?.[lang] || p.category}</Badge>
+              className="group flex items-baseline gap-4 md:gap-6 py-5 border-b border-border">
+              <span className="font-mono text-[10px] tracking-[0.1em] uppercase text-green-deep w-20 md:w-28 shrink-0 pt-0.5">{CATEGORIES[p.category as keyof typeof CATEGORIES]?.[lang] || p.category}</span>
               <div className="flex-1 min-w-0">
-                <div className="text-[15px] font-semibold truncate">{bi(p.title, p.titleEn)}</div>
-                <div className="text-[12.5px] text-gray-400">{RESEARCH_AREAS[p.researchArea as keyof typeof RESEARCH_AREAS]?.[lang]}</div>
+                <div className="text-[16px] font-semibold tracking-tight group-hover:text-green-deep transition-colors">{bi(p.title, p.titleEn)}</div>
+                <div className="text-[12.5px] text-ink-faint mt-0.5">{RESEARCH_AREAS[p.researchArea as keyof typeof RESEARCH_AREAS]?.[lang]}</div>
               </div>
-              <div className="text-[12px] text-gray-400 whitespace-nowrap hidden sm:block">{p.publishedAt?.slice(0, 10)}</div>
-              <Icon name="arrow" size={14} className="text-gray-300" />
+              <span className="font-mono text-[11px] text-ink-faint whitespace-nowrap hidden sm:block pt-0.5">{p.publishedAt?.slice(0, 10)}</span>
             </Link>
           ))}
-          {filtered.length === 0 && <div className="py-10 text-center text-gray-400">{t('등록된 자료가 없습니다.', 'No publications found.')}</div>}
+          {filtered.length === 0 && <div className="py-10 text-center text-ink-faint">{t('등록된 자료가 없습니다.', 'No publications found.')}</div>}
         </div>
       </section>
 
-      {/* ─── OVERVIEW BOX ─── */}
+      {/* ─── OVERVIEW ─── */}
       <div className="max-w-[1140px] mx-auto px-6 pb-20">
-        <div className="bg-bg-alt rounded-2xl p-10 grid grid-cols-1 md:grid-cols-3 gap-8 border border-border">
+        <div className="border-t-2 border-green-deep pt-8 grid grid-cols-1 md:grid-cols-3 gap-8">
           {[
             { title: 'Principles', items: ['Independent Research', 'Collective Intelligence'] },
             { title: 'Focus Areas', items: ['AI Governance & Regulation', 'Digital Public Infrastructure', 'Digital Identity & Trust', 'Data Governance & Privacy', 'Digital Assets & Tokenized Infra'] },
             { title: 'Activities', items: ['Global Policy Hub', 'Policy Roundtable / Seminar', 'Forum'] },
           ].map(col => (
             <div key={col.title}>
-              <div className="text-[11px] font-bold tracking-widest uppercase text-green-deep mb-3.5">{col.title}</div>
+              <div className="eyebrow text-green-deep/70 mb-4">{col.title}</div>
               {col.items.map(item => (
-                <div key={item} className="text-[14px] text-gray-500 pl-3.5 relative mb-2">
-                  <span className="absolute left-0 top-[9px] w-[5px] h-[5px] bg-green-deep rounded-full opacity-40" />{item}
-                </div>
+                <div key={item} className="text-[13.5px] text-ink-soft py-1.5 border-b border-border/60 last:border-0">{item}</div>
               ))}
             </div>
           ))}
