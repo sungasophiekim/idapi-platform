@@ -142,7 +142,7 @@ async function main() {
     publishedAt: new Date('2026-07-22T09:00:00+09:00'),
   };
   const post = await prisma.post.upsert({ where: { slug }, update: data, create: data });
-  console.log('POST:', post.slug, post.status, post.publishedAt.toISOString().slice(0, 10));
+  console.log('POST:', post.slug, post.status, post.publishedAt?.toISOString().slice(0, 10));
   process.exit(0);
 }
 main();
