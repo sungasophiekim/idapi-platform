@@ -22,7 +22,7 @@ export default function ResearchClient({ posts }: { posts: any[] }) {
   return (
     <>
       {/* ─── Masthead band ─── */}
-      <section className="text-white bg-[radial-gradient(120%_130%_at_15%_0%,#24463703_0%,#1F3A2E_38%,#14251D_100%)]">
+      <section className="text-white bg-green-deep">
         <div className="max-w-[1140px] mx-auto px-6 pt-28 pb-12 md:pt-32 md:pb-14">
           <div className="eyebrow text-[#f0c059]/90 mb-4">{t('연구자료', 'Research')}</div>
           <h1 className={`text-[30px] md:text-[44px] font-bold tracking-[-0.03em] leading-[1.08] ${lang === 'en' ? 'font-serif font-medium' : ''}`}>{t('연구 및 정책 자료', 'Research & Policy')}</h1>

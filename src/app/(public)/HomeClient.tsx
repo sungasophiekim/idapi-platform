@@ -30,7 +30,7 @@ export default function HomeClient({ posts }: { posts: any[] }) {
   return (
     <>
       {/* ─── HERO BANNER — featured + recent sidebar ─── */}
-      <section className="text-white bg-[radial-gradient(120%_130%_at_15%_0%,#24463703_0%,#1F3A2E_38%,#14251D_100%)]">
+      <section className="text-white bg-green-deep">
         <div className="max-w-[1140px] mx-auto px-6 pt-28 pb-16 md:pt-32 md:pb-20">
           {/* Masthead line */}
           <div className="flex items-center justify-between pb-6 mb-9 border-b border-white/15">
