@@ -34,9 +34,23 @@ export default function WritePage() {
   const [newIdea, setNewIdea] = useState('');
   const [newCat, setNewCat] = useState('POLICY_BRIEF');
   const [showEn, setShowEn] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const taRef = useRef<HTMLTextAreaElement>(null);
 
   const isEditor = role === 'ADMIN' || role === 'EDITOR';
+
+  async function uploadImage(file: File) {
+    if (!draft || !file) return;
+    setUploading(true);
+    try {
+      const fd = new FormData();
+      fd.append('file', file);
+      const r = await fetch('/api/admin/upload', { method: 'POST', body: fd });
+      const d = await r.json();
+      if (r.ok && d.url) { setDraft({ ...draft, featuredImage: d.url }); patch({ featuredImage: d.url }); }
+      else alert(d.error || '업로드 실패');
+    } finally { setUploading(false); }
+  }
 
   const loadList = useCallback(async () => {
     const d = await (await fetch('/api/admin/drafts')).json();
@@ -193,10 +207,15 @@ export default function WritePage() {
                 placeholder="Title (EN)" className="px-3 py-2 rounded-lg border border-gray-200 text-sm" />
             </div>
 
-            {/* Featured image URL */}
+            {/* Featured image — URL or file upload */}
             <div className="flex items-center gap-3 mb-4">
               <input value={draft.featuredImage || ''} onChange={e => setDraft({ ...draft, featuredImage: e.target.value })} onBlur={() => patch({ featuredImage: draft.featuredImage || '' })}
-                placeholder="대표이미지 URL (배너·카드 커버) — https://…" className="flex-1 px-3 py-2 rounded-lg border border-gray-200 text-sm" />
+                placeholder="대표이미지 URL 또는 파일 업로드 →" className="flex-1 px-3 py-2 rounded-lg border border-gray-200 text-sm" />
+              <label className={`px-3 py-2 rounded-lg border border-gray-200 text-[12px] font-semibold cursor-pointer hover:border-green-deep whitespace-nowrap ${uploading ? 'opacity-60 pointer-events-none' : ''}`}>
+                {uploading ? '업로드 중…' : '파일 업로드'}
+                <input type="file" accept="image/*" className="hidden"
+                  onChange={e => { const f = e.target.files?.[0]; if (f) uploadImage(f); e.target.value = ''; }} />
+              </label>
               {draft.featuredImage
                 ? <img src={draft.featuredImage} alt="" className="w-16 h-16 rounded-lg object-cover border border-border shrink-0" />
                 : <div className="w-16 h-16 rounded-lg border border-dashed border-gray-300 shrink-0 flex items-center justify-center text-[10px] text-gray-400">미리보기</div>}
