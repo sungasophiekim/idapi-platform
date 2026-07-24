@@ -28,7 +28,7 @@ export default function HomeClient({ posts }: { posts: any[] }) {
     <>
       {/* ─── HERO BANNER — featured + recent sidebar ─── */}
       <section className="text-white bg-[radial-gradient(120%_130%_at_15%_0%,#24463703_0%,#1F3A2E_38%,#14251D_100%)]">
-        <div className="max-w-[1140px] mx-auto px-6 pt-10 pb-16 md:pt-12 md:pb-20">
+        <div className="max-w-[1140px] mx-auto px-6 pt-28 pb-16 md:pt-32 md:pb-20">
           {/* Masthead line */}
           <div className="flex items-center justify-between pb-6 mb-9 border-b border-white/15">
             <span className="font-mono text-[10.5px] tracking-[0.16em] uppercase text-[#f0c059]">{t('IDAPI 리서치', 'IDAPI Research')}</span>
