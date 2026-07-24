@@ -63,6 +63,7 @@ const patchSchema = z.object({
   id: z.string(),
   title: z.string().optional(),
   titleEn: z.string().optional(),
+  featuredImage: z.string().optional(),
   excerpt: z.string().optional(),
   content: z.string().optional(),
   contentEn: z.string().optional(),

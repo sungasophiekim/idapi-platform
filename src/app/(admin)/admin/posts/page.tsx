@@ -67,6 +67,7 @@ export default function AdminPostsPage() {
           <InputField label="Slug (URL)" value={f.slug || ''} onChange={v => set('slug', v)} placeholder="auto-generated-from-title">
           </InputField>
           <button onClick={autoSlug} className="text-[12px] text-green-deep font-medium -mt-2 mb-3 block">Auto-generate from EN title</button>
+          <InputField label="Featured Image URL (대표이미지)" value={f.featuredImage || ''} onChange={v => set('featuredImage', v)} placeholder="https://…" />
           <InputField label="Excerpt (KO)" value={f.excerpt || ''} onChange={v => set('excerpt', v)} multiline placeholder="간략한 요약..." />
           <InputField label="Excerpt (EN)" value={f.excerptEn || ''} onChange={v => set('excerptEn', v)} multiline placeholder="Brief summary..." />
           <InputField label="Content (KO)" value={f.content || ''} onChange={v => set('content', v)} multiline placeholder="본문 내용..." />

@@ -386,6 +386,7 @@ model ResearchDraft {
   frame        String?  @db.Text   // AI guide outline (markdown)
   title        String?
   titleEn      String?
+  featuredImage String?             // cover image URL
   excerpt      String?  @db.Text
   content      String?  @db.Text   // markdown body (KO)
   contentEn    String?  @db.Text   // markdown body (EN)

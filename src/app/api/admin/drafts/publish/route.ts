@@ -47,6 +47,7 @@ export async function POST(req: NextRequest) {
       excerpt: draft.excerpt,
       content: draft.content,
       contentEn: draft.contentEn,
+      featuredImage: draft.featuredImage,
       publishedAt: new Date(),
     },
   });

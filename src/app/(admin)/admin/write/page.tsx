@@ -23,6 +23,7 @@ interface Draft {
   id: string; idea?: string; frame?: string; title?: string; titleEn?: string;
   excerpt?: string; content?: string; contentEn?: string; category: string;
   researchArea: string; stage: string; reviewNotes?: any[]; postId?: string;
+  featuredImage?: string;
 }
 
 export default function WritePage() {
@@ -190,6 +191,15 @@ export default function WritePage() {
                 placeholder="제목 (KO)" className="px-3 py-2 rounded-lg border border-gray-200 text-sm font-semibold" />
               <input value={draft.titleEn || ''} onChange={e => setDraft({ ...draft, titleEn: e.target.value })} onBlur={() => patch({ titleEn: draft.titleEn })}
                 placeholder="Title (EN)" className="px-3 py-2 rounded-lg border border-gray-200 text-sm" />
+            </div>
+
+            {/* Featured image URL */}
+            <div className="flex items-center gap-3 mb-4">
+              <input value={draft.featuredImage || ''} onChange={e => setDraft({ ...draft, featuredImage: e.target.value })} onBlur={() => patch({ featuredImage: draft.featuredImage || '' })}
+                placeholder="대표이미지 URL (배너·카드 커버) — https://…" className="flex-1 px-3 py-2 rounded-lg border border-gray-200 text-sm" />
+              {draft.featuredImage
+                ? <img src={draft.featuredImage} alt="" className="w-16 h-16 rounded-lg object-cover border border-border shrink-0" />
+                : <div className="w-16 h-16 rounded-lg border border-dashed border-gray-300 shrink-0 flex items-center justify-center text-[10px] text-gray-400">미리보기</div>}
             </div>
 
             {/* Toolbar */}
