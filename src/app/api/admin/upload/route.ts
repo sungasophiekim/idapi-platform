@@ -3,8 +3,15 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { getAuthUser, requireRole } from '@/lib/auth';
-import { supabase } from '@/lib/supabase';
+import { supabase, createServerClient } from '@/lib/supabase';
 import { UserRole } from '@prisma/client';
+
+// Prefer the service-role client (bypasses storage RLS → only this
+// admin-guarded route can write) when the key is configured; otherwise fall
+// back to the anon client so uploads keep working.
+function storageClient() {
+  return process.env.SUPABASE_SERVICE_ROLE_KEY ? createServerClient() : supabase;
+}
 
 export const runtime = 'nodejs';
 
@@ -27,12 +34,13 @@ export async function POST(req: NextRequest) {
   const path = `posts/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
   const buffer = Buffer.from(await file.arrayBuffer());
 
-  const { error } = await supabase.storage.from('media').upload(path, buffer, {
+  const sb = storageClient();
+  const { error } = await sb.storage.from('media').upload(path, buffer, {
     contentType: file.type,
     upsert: false,
   });
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
-  const { data } = supabase.storage.from('media').getPublicUrl(path);
+  const { data } = sb.storage.from('media').getPublicUrl(path);
   return NextResponse.json({ url: data.publicUrl });
 }
