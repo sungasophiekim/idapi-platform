@@ -6,6 +6,7 @@ import { useState } from 'react';
 import { useLang } from '@/lib/i18n';
 import { Icon, Badge, Btn } from '@/components/ui';
 import { CATEGORIES, RESEARCH_AREAS } from '@/types';
+import NewsTicker from '@/components/layout/NewsTicker';
 
 const AREAS_LIST = [
   { num: '01', icon: 'shield', titleKo: 'AI 거버넌스·규제', titleEn: 'AI Governance & Regulation', descKo: 'AI Act, 알고리즘 책무성, 공공부문 AI 도입 등 AI 시대의 규범 설계를 연구합니다.', descEn: 'Norm-setting for the AI era — the AI Act, algorithmic accountability, and public-sector AI.' },
@@ -74,7 +75,7 @@ export default function HomeClient({ posts }: { posts: any[] }) {
 
               {/* Recent (right sidebar, 1/3) */}
               <aside className="lg:border-l lg:border-white/15 lg:pl-12">
-                <div className="eyebrow text-[#f0c059]/90 mb-5">{t('최신 연구', 'Recent')}</div>
+                <div className="eyebrow text-[#f0c059]/90 mb-5">{t('최신컨텐츠', 'Latest')}</div>
                 <div>
                   {posts.slice(0, 5).map((p: any) => (
                     <Link key={p.id} href={`/research/${p.slug}`} className="group block py-4 border-b border-white/12 first:pt-0">
@@ -94,6 +95,9 @@ export default function HomeClient({ posts }: { posts: any[] }) {
           )}
         </div>
       </section>
+
+      {/* News ticker — below the main banner */}
+      <NewsTicker />
 
       {/* ─── RESEARCH AREAS ─── */}
       <section className="py-16 md:py-20 max-w-[1140px] mx-auto px-6">

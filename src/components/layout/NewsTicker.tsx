@@ -55,7 +55,7 @@ export default function NewsTicker() {
   const ai = clips.filter(c => isAI(c.theme));
 
   return (
-    <div className="fixed top-0 left-0 right-0 z-[60] bg-green-deep text-white flex flex-col">
+    <div className="w-full bg-[#14251D] text-white flex flex-col border-y border-white/10">
       <Lane clips={da} label={t('디지털자산뉴스', 'Digital Asset')} accent="text-[#f0c059]" dot="bg-[#f0c059]" offset={0} />
       <div className="border-t border-white/10" />
       <Lane clips={ai} label={t('AI 뉴스', 'AI News')} accent="text-[#8fe3d0]" dot="bg-[#8fe3d0]" offset={2500} />
