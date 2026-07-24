@@ -107,12 +107,9 @@ enum PostCategory {
   REPORT
 }
 
-enum ResearchArea {
-  KOREA_POLICY
-  DIGITAL_FINANCE
-  INFRASTRUCTURE
-  INCLUSION
-}
+// ResearchArea is a plain string keyed to the 5 focus areas
+// (AI_GOVERNANCE, DPI, DIGITAL_IDENTITY, DATA_GOVERNANCE, DIGITAL_ASSETS);
+// labels live in src/types RESEARCH_AREAS.
 
 enum PostStatus {
   DRAFT
@@ -127,7 +124,7 @@ model Post {
   authorId      String?      // User who created
   teamAuthorId  String?      // Team member shown as author
   category      PostCategory
-  researchArea  ResearchArea
+  researchArea  String
   status        PostStatus   @default(DRAFT)
 
   // Content (bilingual)
@@ -222,7 +219,7 @@ model Regulation {
   sourceName      String?          // e.g. "금융위원회", "SEC", "EU Parliament"
   billNumber      String?          // e.g. "의안번호 2200001"
   tags            String[]
-  researchArea    ResearchArea?
+  researchArea    String?
   impactScore     Int?             // AI-assessed 1-10 importance
   proposedDate    DateTime?
   lastUpdatedDate DateTime?
@@ -382,7 +379,7 @@ model ResearchDraft {
   id           String       @id @default(cuid())
   authorId     String?      // researcher (User)
   category     PostCategory @default(POLICY_BRIEF)
-  researchArea ResearchArea @default(KOREA_POLICY)
+  researchArea String       @default("AI_GOVERNANCE")
   stage        DraftStage   @default(IDEA)
 
   idea         String?  @db.Text   // topic + key points

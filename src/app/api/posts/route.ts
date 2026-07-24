@@ -60,7 +60,7 @@ const createPostSchema = z.object({
   content: z.string().optional(),
   contentEn: z.string().optional(),
   category: z.enum(['COMMENTARY', 'POLICY_BRIEF', 'PRESS_RELEASE', 'SEMINAR', 'REPORT']),
-  researchArea: z.enum(['KOREA_POLICY', 'DIGITAL_FINANCE', 'INFRASTRUCTURE', 'INCLUSION']),
+  researchArea: z.enum(['AI_GOVERNANCE', 'DPI', 'DIGITAL_IDENTITY', 'DATA_GOVERNANCE', 'DIGITAL_ASSETS']),
   status: z.enum(['DRAFT', 'REVIEW', 'PUBLISHED', 'ARCHIVED']).default('DRAFT'),
   teamAuthorId: z.string().optional(),
   publishedAt: z.string().optional(),

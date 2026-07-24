@@ -1,7 +1,7 @@
 // prisma/seed.ts
 // Run: npx tsx prisma/seed.ts
 
-import { PrismaClient, UserRole, MemberType, PostCategory, ResearchArea, PostStatus } from '@prisma/client';
+import { PrismaClient, UserRole, MemberType, PostCategory, PostStatus } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 
 const prisma = new PrismaClient();
@@ -100,7 +100,7 @@ async function main() {
       teamAuthorId: founder.id,
       authorId: sophie.id,
       category: PostCategory.POLICY_BRIEF,
-      researchArea: ResearchArea.KOREA_POLICY,
+      researchArea: 'AI_GOVERNANCE',
       status: PostStatus.PUBLISHED,
       title: '디지털자산 과세 유예와 시장 영향 분석',
       titleEn: 'Analysis of Digital Asset Tax Deferral and Market Impact',
@@ -114,7 +114,7 @@ async function main() {
       teamAuthorId: fellowKim.id,
       authorId: null,
       category: PostCategory.COMMENTARY,
-      researchArea: ResearchArea.DIGITAL_FINANCE,
+      researchArea: 'DIGITAL_ASSETS',
       status: PostStatus.PUBLISHED,
       title: '스테이블코인 규제 프레임워크: 글로벌 동향과 시사점',
       titleEn: 'Stablecoin Regulatory Framework: Global Trends and Implications',
@@ -128,7 +128,7 @@ async function main() {
       teamAuthorId: founder.id,
       authorId: sophie.id,
       category: PostCategory.SEMINAR,
-      researchArea: ResearchArea.INFRASTRUCTURE,
+      researchArea: 'DPI',
       status: PostStatus.PUBLISHED,
       title: '토큰화 자산(RWA)과 자본시장의 미래',
       titleEn: 'Tokenized Assets (RWA) and the Future of Capital Markets',
@@ -142,7 +142,7 @@ async function main() {
       teamAuthorId: founder.id,
       authorId: sophie.id,
       category: PostCategory.PRESS_RELEASE,
-      researchArea: ResearchArea.KOREA_POLICY,
+      researchArea: 'AI_GOVERNANCE',
       status: PostStatus.PUBLISHED,
       title: 'IDAPI, 싱가포르 기반 비영리 재단으로 공식 설립',
       titleEn: 'IDAPI Officially Established as Non-Profit Foundation in Singapore',

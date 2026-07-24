@@ -19,7 +19,7 @@ const updateRegulationSchema = z.object({
   sourceName: z.string().max(200).optional().nullable(),
   billNumber: z.string().max(100).optional().nullable(),
   tags: z.array(z.string()).optional(),
-  researchArea: z.enum(['KOREA_POLICY', 'DIGITAL_FINANCE', 'INFRASTRUCTURE', 'INCLUSION']).optional().nullable(),
+  researchArea: z.enum(['AI_GOVERNANCE', 'DPI', 'DIGITAL_IDENTITY', 'DATA_GOVERNANCE', 'DIGITAL_ASSETS']).optional().nullable(),
   rawContent: z.string().max(50000).optional().nullable(),
   proposedDate: z.string().optional().nullable(),
   enactedDate: z.string().optional().nullable(),

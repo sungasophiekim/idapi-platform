@@ -2,7 +2,7 @@
 // Run: npx tsx prisma/seed-phase2.ts
 // Adds sample regulations for dashboard demo
 
-import { PrismaClient, Jurisdiction, RegulationStatus, ResearchArea } from '@prisma/client';
+import { PrismaClient, Jurisdiction, RegulationStatus } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
@@ -20,7 +20,7 @@ async function main() {
       sourceName: '금융위원회',
       impactScore: 9,
       tags: ['user-protection', 'exchange', 'custody'],
-      researchArea: ResearchArea.KOREA_POLICY,
+      researchArea: 'AI_GOVERNANCE',
       proposedDate: new Date('2023-06-30'),
       enactedDate: new Date('2024-07-19'),
       lastUpdatedDate: new Date('2024-07-19'),
@@ -43,7 +43,7 @@ async function main() {
       sourceName: '국회 정무위원회',
       impactScore: 10,
       tags: ['framework', 'licensing', 'STO', 'token-classification'],
-      researchArea: ResearchArea.KOREA_POLICY,
+      researchArea: 'AI_GOVERNANCE',
       proposedDate: new Date('2024-11-15'),
       lastUpdatedDate: new Date('2025-03-20'),
       timelineEvents: {
@@ -64,7 +64,7 @@ async function main() {
       billNumber: 'S.394',
       impactScore: 8,
       tags: ['stablecoin', 'reserve-requirements', 'issuer-registration'],
-      researchArea: ResearchArea.DIGITAL_FINANCE,
+      researchArea: 'DIGITAL_ASSETS',
       proposedDate: new Date('2025-02-04'),
       lastUpdatedDate: new Date('2025-05-15'),
       timelineEvents: {
@@ -84,7 +84,7 @@ async function main() {
       sourceName: 'European Parliament',
       impactScore: 9,
       tags: ['MiCA', 'comprehensive-framework', 'stablecoin', 'CASP'],
-      researchArea: ResearchArea.DIGITAL_FINANCE,
+      researchArea: 'DIGITAL_ASSETS',
       proposedDate: new Date('2020-09-24'),
       enactedDate: new Date('2024-12-30'),
       lastUpdatedDate: new Date('2024-12-30'),
@@ -106,7 +106,7 @@ async function main() {
       sourceName: 'MAS',
       impactScore: 7,
       tags: ['PSA', 'licensing', 'AML', 'DPT'],
-      researchArea: ResearchArea.INFRASTRUCTURE,
+      researchArea: 'DPI',
       proposedDate: new Date('2019-01-28'),
       enactedDate: new Date('2020-01-28'),
       lastUpdatedDate: new Date('2025-01-10'),
@@ -127,7 +127,7 @@ async function main() {
       sourceName: 'FSA Japan',
       impactScore: 6,
       tags: ['stablecoin', 'banking', 'issuance'],
-      researchArea: ResearchArea.DIGITAL_FINANCE,
+      researchArea: 'DIGITAL_ASSETS',
       proposedDate: new Date('2025-04-01'),
       lastUpdatedDate: new Date('2025-04-01'),
       timelineEvents: {
@@ -146,7 +146,7 @@ async function main() {
       sourceName: 'SFC Hong Kong',
       impactScore: 7,
       tags: ['VASP', 'licensing', 'exchange'],
-      researchArea: ResearchArea.INFRASTRUCTURE,
+      researchArea: 'DPI',
       proposedDate: new Date('2022-12-01'),
       enactedDate: new Date('2023-06-01'),
       lastUpdatedDate: new Date('2025-02-15'),
@@ -167,7 +167,7 @@ async function main() {
       sourceName: 'FATF',
       impactScore: 8,
       tags: ['travel-rule', 'AML', 'FATF', 'compliance'],
-      researchArea: ResearchArea.INFRASTRUCTURE,
+      researchArea: 'DPI',
       proposedDate: new Date('2021-10-28'),
       lastUpdatedDate: new Date('2025-02-01'),
       timelineEvents: {

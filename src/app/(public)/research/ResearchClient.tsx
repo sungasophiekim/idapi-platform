@@ -32,24 +32,21 @@ export default function ResearchClient({ posts }: { posts: any[] }) {
 
       {/* ─── Content ─── */}
       <section className="max-w-[1140px] mx-auto px-6 py-12 md:py-14">
-        {/* Filters */}
-        <div className="flex items-baseline gap-x-5 gap-y-1.5 mb-2.5 flex-wrap">
-          <span className="font-mono text-[10px] tracking-[0.1em] uppercase text-ink-faint w-16 shrink-0">{t('연구영역', 'Area')}</span>
+        {/* Primary filter — research area, with a format dropdown */}
+        <div className="flex items-center gap-x-6 gap-y-3 mb-4 flex-wrap">
           {[{ value: 'all', label: t('전체', 'All') }, ...Object.entries(RESEARCH_AREAS).map(([k, v]) => ({ value: k, label: lang === 'en' ? v.en : v.ko }))].map(a => (
             <button key={a.value} onClick={() => setAreaFilter(a.value)}
-              className={`font-mono text-[11px] tracking-[0.04em] uppercase pb-0.5 border-b-2 transition-colors cursor-pointer ${areaFilter === a.value ? 'border-green-deep text-green-deep' : 'border-transparent text-ink-faint hover:text-ink-soft'}`}>
+              className={`text-[14px] font-semibold tracking-tight pb-1 border-b-2 transition-colors cursor-pointer ${areaFilter === a.value ? 'border-green-deep text-green-deep' : 'border-transparent text-ink-faint hover:text-ink-soft'}`}>
               {a.label}
             </button>
           ))}
-        </div>
-        <div className="flex items-baseline gap-x-5 gap-y-1.5 mb-8 flex-wrap">
-          <span className="font-mono text-[10px] tracking-[0.1em] uppercase text-ink-faint w-16 shrink-0">{t('카테고리', 'Type')}</span>
-          {[{ value: 'all', label: t('전체', 'All') }, ...Object.entries(CATEGORIES).map(([k, v]) => ({ value: k, label: lang === 'en' ? v.en : v.ko }))].map(c => (
-            <button key={c.value} onClick={() => setCatFilter(c.value)}
-              className={`font-mono text-[11px] tracking-[0.04em] uppercase pb-0.5 border-b-2 transition-colors cursor-pointer ${catFilter === c.value ? 'border-green-deep text-green-deep' : 'border-transparent text-ink-faint hover:text-ink-soft'}`}>
-              {c.label}
-            </button>
-          ))}
+          <div className="ml-auto">
+            <select value={catFilter} onChange={e => setCatFilter(e.target.value)}
+              className="font-mono text-[11px] tracking-[0.04em] uppercase text-ink-soft border border-border rounded px-3 py-1.5 bg-white cursor-pointer hover:border-green-deep/40 outline-none">
+              <option value="all">{t('전체 포맷', 'All formats')}</option>
+              {Object.entries(CATEGORIES).map(([k, v]) => <option key={k} value={k}>{lang === 'en' ? v.en : v.ko}</option>)}
+            </select>
+          </div>
         </div>
 
         <div className="font-mono text-[11px] text-ink-faint mb-6 pb-3 border-b-2 border-green-deep">{filtered.length} {t('건', 'results')}</div>

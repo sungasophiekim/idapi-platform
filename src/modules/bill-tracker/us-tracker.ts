@@ -409,22 +409,13 @@ function mapPathToBillType(slug: string): string {
   return map[slug] || 'hr';
 }
 
-function inferResearchArea(title: string): 'DIGITAL_FINANCE' | 'INFRASTRUCTURE' | 'KOREA_POLICY' | 'INCLUSION' {
+function inferResearchArea(title: string): 'AI_GOVERNANCE' | 'DPI' | 'DIGITAL_IDENTITY' | 'DATA_GOVERNANCE' | 'DIGITAL_ASSETS' {
   const t = title.toLowerCase();
-  if (
-    t.includes('stablecoin') || t.includes('payment') || t.includes('currency') ||
-    t.includes('securities') || t.includes('exchange') || t.includes('financial') ||
-    t.includes('token') || t.includes('bitcoin') || t.includes('crypto')
-  ) {
-    return 'DIGITAL_FINANCE';
-  }
-  if (
-    t.includes('blockchain') || t.includes('infrastructure') ||
-    t.includes('artificial intelligence') || t.includes(' ai ')
-  ) {
-    return 'INFRASTRUCTURE';
-  }
-  return 'DIGITAL_FINANCE'; // Default for US crypto/AI bills
+  if (t.includes('artificial intelligence') || t.includes(' ai ') || t.includes('algorithm')) return 'AI_GOVERNANCE';
+  if (t.includes('identity') || t.includes('credential')) return 'DIGITAL_IDENTITY';
+  if (t.includes('data ') || t.includes('privacy')) return 'DATA_GOVERNANCE';
+  if (t.includes('infrastructure') || t.includes('interoperab') || t.includes('e-government')) return 'DPI';
+  return 'DIGITAL_ASSETS'; // Default for US crypto/AI bills
 }
 
 function buildTags(bill: CongressBill): string[] {

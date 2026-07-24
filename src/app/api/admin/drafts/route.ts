@@ -36,7 +36,7 @@ export async function GET(req: NextRequest) {
 const createSchema = z.object({
   idea: z.string().min(1),
   category: z.enum(['COMMENTARY', 'POLICY_BRIEF', 'PRESS_RELEASE', 'SEMINAR', 'REPORT']),
-  researchArea: z.enum(['KOREA_POLICY', 'DIGITAL_FINANCE', 'INFRASTRUCTURE', 'INCLUSION']).optional(),
+  researchArea: z.enum(['AI_GOVERNANCE', 'DPI', 'DIGITAL_IDENTITY', 'DATA_GOVERNANCE', 'DIGITAL_ASSETS']).optional(),
 }).strict();
 
 // POST /api/admin/drafts  → create from idea
@@ -52,7 +52,7 @@ export async function POST(req: NextRequest) {
       authorId: (user as any).id ?? null,
       idea: parsed.data.idea,
       category: parsed.data.category,
-      researchArea: parsed.data.researchArea ?? 'KOREA_POLICY',
+      researchArea: parsed.data.researchArea ?? 'AI_GOVERNANCE',
       stage: 'IDEA',
     },
   });
@@ -69,7 +69,7 @@ const patchSchema = z.object({
   frame: z.string().optional(),
   idea: z.string().optional(),
   category: z.enum(['COMMENTARY', 'POLICY_BRIEF', 'PRESS_RELEASE', 'SEMINAR', 'REPORT']).optional(),
-  researchArea: z.enum(['KOREA_POLICY', 'DIGITAL_FINANCE', 'INFRASTRUCTURE', 'INCLUSION']).optional(),
+  researchArea: z.enum(['AI_GOVERNANCE', 'DPI', 'DIGITAL_IDENTITY', 'DATA_GOVERNANCE', 'DIGITAL_ASSETS']).optional(),
   stage: z.enum(['IDEA', 'FRAME', 'DRAFTING', 'AI_REVIEW', 'EDITOR_REVIEW', 'REVISION', 'READY', 'PUBLISHED']).optional(),
 }).strict();
 

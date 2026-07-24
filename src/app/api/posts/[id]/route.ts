@@ -15,7 +15,7 @@ const updatePostSchema = z.object({
   content: z.string().optional(),
   contentEn: z.string().optional(),
   category: z.enum(['COMMENTARY', 'POLICY_BRIEF', 'PRESS_RELEASE', 'SEMINAR', 'REPORT']).optional(),
-  researchArea: z.enum(['KOREA_POLICY', 'DIGITAL_FINANCE', 'INFRASTRUCTURE', 'INCLUSION']).optional(),
+  researchArea: z.enum(['AI_GOVERNANCE', 'DPI', 'DIGITAL_IDENTITY', 'DATA_GOVERNANCE', 'DIGITAL_ASSETS']).optional(),
   status: z.enum(['DRAFT', 'REVIEW', 'PUBLISHED', 'ARCHIVED']).optional(),
   teamAuthorId: z.string().optional(),
   featuredImage: z.string().url().optional().nullable(),

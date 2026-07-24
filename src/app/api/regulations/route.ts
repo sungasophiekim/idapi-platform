@@ -43,7 +43,7 @@ const createSchema = z.object({
   sourceName: z.string().optional(),
   billNumber: z.string().optional(),
   tags: z.array(z.string()).optional(),
-  researchArea: z.enum(['KOREA_POLICY', 'DIGITAL_FINANCE', 'INFRASTRUCTURE', 'INCLUSION']).optional(),
+  researchArea: z.enum(['AI_GOVERNANCE', 'DPI', 'DIGITAL_IDENTITY', 'DATA_GOVERNANCE', 'DIGITAL_ASSETS']).optional(),
   rawContent: z.string().optional(),
   proposedDate: z.string().optional(),
   runAiAnalysis: z.boolean().default(false),

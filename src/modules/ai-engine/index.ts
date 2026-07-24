@@ -60,7 +60,7 @@ ALWAYS respond in valid JSON with this exact schema:
   "summaryEn": "English summary (2-3 sentences)",
   "impactScore": <number 1-10>,
   "tags": ["tag1", "tag2", ...],
-  "researchArea": "KOREA_POLICY" | "DIGITAL_FINANCE" | "INFRASTRUCTURE" | "INCLUSION",
+  "researchArea": "AI_GOVERNANCE" | "DPI" | "DIGITAL_IDENTITY" | "DATA_GOVERNANCE" | "DIGITAL_ASSETS",
   "keyPoints": ["Korean key point 1", "Korean key point 2", ...],
   "keyPointsEn": ["English key point 1", "English key point 2", ...]
 }
@@ -85,7 +85,7 @@ Impact scoring guide:
       summaryEn: 'Analysis encountered an error.',
       impactScore: 5,
       tags: [],
-      researchArea: 'KOREA_POLICY',
+      researchArea: 'AI_GOVERNANCE',
       keyPoints: [],
       keyPointsEn: [],
     };
