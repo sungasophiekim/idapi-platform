@@ -24,6 +24,8 @@ export default function HomeClient({ posts }: { posts: any[] }) {
   const filtered = filter === 'all' ? posts : posts.filter((p: any) => p.category === filter);
   const featured = posts.slice(0, Math.min(4, posts.length));
   const active = posts[feat] || posts[0];
+  const readMin = (p: any) => Math.max(1, Math.round(((p?.content || p?.contentEn || '').length) / 500));
+  const initials = (n: string) => (n || '').split(' ').map(s => s[0]).join('').slice(0, 2);
 
   return (
     <>
@@ -41,26 +43,43 @@ export default function HomeClient({ posts }: { posts: any[] }) {
               {/* Featured (left, 2/3) */}
               <div className="lg:col-span-2 flex flex-col">
                 <Link href={`/research/${active.slug}`} className="block group flex-1">
-                  <div className="flex items-center gap-3 mb-6">
-                    <span className="font-mono text-[10px] tracking-[0.13em] uppercase bg-[#f0c059] text-[#1c1c1c] px-2.5 py-1 rounded font-medium">
-                      {CATEGORIES[active.category as keyof typeof CATEGORIES]?.[lang] || active.category}
-                    </span>
-                    <span className="font-mono text-[10.5px] tracking-[0.06em] text-white/55">{RESEARCH_AREAS[active.researchArea as keyof typeof RESEARCH_AREAS]?.[lang]}</span>
+                  <div className="flex flex-col md:flex-row gap-7 md:gap-10">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-3 mb-6">
+                        <span className="font-mono text-[10px] tracking-[0.13em] uppercase bg-[#f0c059] text-[#1c1c1c] px-2.5 py-1 rounded font-medium">
+                          {CATEGORIES[active.category as keyof typeof CATEGORIES]?.[lang] || active.category}
+                        </span>
+                        <span className="font-mono text-[10.5px] tracking-[0.06em] text-white/55">{RESEARCH_AREAS[active.researchArea as keyof typeof RESEARCH_AREAS]?.[lang]}</span>
+                      </div>
+                      <h1 className={`text-[30px] md:text-[46px] font-bold leading-[1.1] tracking-[-0.035em] group-hover:text-[#f0c059] transition-colors ${lang === 'en' ? 'font-serif font-medium leading-[1.06]' : ''}`}>
+                        {bi(active.title, active.titleEn)}
+                      </h1>
+                      {(active.excerpt || active.excerptEn) && (
+                        <p className="mt-5 text-[15.5px] md:text-[17px] text-white/80 leading-[1.6] max-w-[56ch]">{bi(active.excerpt, active.excerptEn)}</p>
+                      )}
+                      {/* Byline — author avatar · name · date · read time */}
+                      <div className="mt-6 flex items-center gap-2.5">
+                        {active.teamAuthor?.avatarUrl ? (
+                          <img src={active.teamAuthor.avatarUrl} alt="" className="w-7 h-7 rounded-full object-cover border border-white/20" />
+                        ) : (
+                          <span className="w-7 h-7 rounded-full bg-white/10 border border-white/15 flex items-center justify-center text-[9px] font-bold text-white/70">{active.teamAuthor ? initials(active.teamAuthor.name) : 'ID'}</span>
+                        )}
+                        <span className="text-[12.5px] font-medium text-white/85">{active.teamAuthor ? bi(active.teamAuthor.name, active.teamAuthor.nameEn) : 'IDAPI Research'}</span>
+                        <span className="text-white/25">·</span>
+                        <span className="font-mono text-[11px] text-white/50">{active.publishedAt?.slice(0, 10)}</span>
+                        <span className="text-white/25">·</span>
+                        <span className="font-mono text-[11px] text-white/50">{readMin(active)}{t('분', ' min')}</span>
+                      </div>
+                      <span className="inline-flex items-center gap-2 mt-8 px-6 py-3 bg-[#f0c059] text-green-deep rounded text-[13px] font-bold group-hover:gap-3.5 transition-all">
+                        {t('전문 읽기', 'Read now')} <Icon name="arrow" size={15} />
+                      </span>
+                    </div>
+                    {active.featuredImage && (
+                      <div className="md:w-[240px] lg:w-[270px] shrink-0 self-stretch">
+                        <img src={active.featuredImage} alt="" className="w-full h-full min-h-[200px] object-cover rounded-lg grayscale-[0.25] contrast-[1.05]" />
+                      </div>
+                    )}
                   </div>
-                  <h1 className={`text-[32px] md:text-[52px] font-bold leading-[1.1] tracking-[-0.035em] group-hover:text-[#f0c059] transition-colors ${lang === 'en' ? 'font-serif font-medium leading-[1.06]' : ''}`}>
-                    {bi(active.title, active.titleEn)}
-                  </h1>
-                  {(active.excerpt || active.excerptEn) && (
-                    <p className="mt-5 text-[16px] md:text-[17.5px] text-white/80 leading-[1.65] max-w-[60ch]">{bi(active.excerpt, active.excerptEn)}</p>
-                  )}
-                  <div className="mt-6 flex items-center gap-3 font-mono text-[11px] tracking-[0.04em] text-white/55">
-                    <span>{active.teamAuthor ? bi(active.teamAuthor.name, active.teamAuthor.nameEn) : 'IDAPI Research'}</span>
-                    <span className="text-white/30">·</span>
-                    <span>{active.publishedAt?.slice(0, 10)}</span>
-                  </div>
-                  <span className="inline-flex items-center gap-2 mt-8 px-6 py-3 bg-[#f0c059] text-green-deep rounded text-[13px] font-bold group-hover:gap-3.5 transition-all">
-                    {t('전문 읽기', 'Read now')} <Icon name="arrow" size={15} />
-                  </span>
                 </Link>
                 {/* Carousel dots */}
                 {featured.length > 1 && (
