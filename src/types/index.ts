@@ -10,10 +10,10 @@ export const CATEGORIES = {
 } as const;
 
 export const RESEARCH_AREAS = {
-  KOREA_POLICY:    { ko: '한국 디지털자산 정책', en: 'DigitalAsset Policy KR' },
-  DIGITAL_FINANCE: { ko: '디지털자산금융',       en: 'DigitalAsset Finance' },
-  INFRASTRUCTURE:  { ko: '시장인프라',           en: 'Infrastructure' },
-  INCLUSION:       { ko: '디지털임팩트 및 포용', en: 'Digital Impact & Inclusion' },
+  KOREA_POLICY:    { ko: 'AI·규제 정책',       en: 'AI & Regulatory Policy' },
+  DIGITAL_FINANCE: { ko: '디지털 금융·자산',   en: 'Digital Finance & Assets' },
+  INFRASTRUCTURE:  { ko: '기술·인프라',        en: 'Technology & Infrastructure' },
+  INCLUSION:       { ko: '거버넌스·영향',      en: 'Governance & Impact' },
 } as const;
 
 export type Lang = 'ko' | 'en';
